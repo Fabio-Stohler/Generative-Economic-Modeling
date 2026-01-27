@@ -1,16 +1,22 @@
+"""Surrogate neural network training, persistence, and evaluation utilities."""
+
 # %%
-import torch
+# Standard library
+from pathlib import Path
+import copy
+import math
 import pickle
+
+# Third-party dependencies
 import numpy as np
 import pandas as pd
+import torch
 from tqdm import trange
-from pathlib import Path
-import math
-import copy
 
 
 # %% Normalization layer for the neural network
 class NormalizeLayer(torch.nn.Module):
+    """Normalize inputs to [-1, 1] based on lower/upper bounds."""
     def __init__(self, lower_bound, upper_bound):
         super(NormalizeLayer, self).__init__()
 
@@ -24,6 +30,7 @@ class NormalizeLayer(torch.nn.Module):
 
 # %% Scaling layer for the neural network
 class ScaleLayer(torch.nn.Module):
+    """Rescale outputs from [-1, 1] to the original data range."""
     def __init__(self, lower_bound, upper_bound):
         super(ScaleLayer, self).__init__()
 
@@ -41,8 +48,9 @@ class ScaleLayer(torch.nn.Module):
 
 # %% Surrogate neural network that maps from x to y
 class Surrogate:
+    """Wrap a feedforward network plus training helpers for surrogate modeling."""
     def __init__(self, data=None):
-        # Convert dataset to torch tensors
+        # Convert dataset to torch tensors if provided.
         if data is not None:
             self.data = self.flatten(copy.deepcopy(data))
             self.N_x = self.data["x"].shape[-1]
@@ -57,17 +65,18 @@ class Surrogate:
         self.data_validation = None
         self.loss_dict = None
 
-        # Accuracy
+        # Accuracy and diagnostics
         self.accuracy = None
         self.cm = None
 
     def flatten(self, data):
-        # Flatten last dimension
+        # Flatten last dimension so samples are 2D (N x features).
         for k in data.keys():
             data[k] = data[k].flatten(start_dim=0, end_dim=-2)
         return data
 
     def shuffle(self, data):
+        # Shuffle samples in unison for x/y pairs.
         N_sample = data["x"].shape[0]
 
         # Randomly shuffle the dataset
@@ -78,6 +87,7 @@ class Surrogate:
         return data
 
     def split_data(self, data, validation_share=0.2, shuffle=True):
+        # Split a dataset into train/validation folds.
         N_sample = data["x"].shape[0]
         N_train = int(N_sample * (1 - validation_share))
 
@@ -93,6 +103,7 @@ class Surrogate:
         return data_train, data_validation
 
     def save(self, path, name="surrogate"):
+        """Save the surrogate to disk via pickle."""
         # Create directory
         Path(path).mkdir(parents=True, exist_ok=True)
 
@@ -102,6 +113,7 @@ class Surrogate:
 
     @classmethod
     def load(cls, path):
+        """Load a pickled surrogate from disk."""
         # Load the object
         with open(path, "rb") as file:
             obj = pickle.load(file)
@@ -109,6 +121,7 @@ class Surrogate:
         return obj
 
     def load_attributes(self, path):
+        """Populate attributes from a saved surrogate object."""
         # Load the object
         with open(path, "rb") as f:
             obj = pickle.load(f)
@@ -117,6 +130,7 @@ class Surrogate:
         self.__dict__.update(obj.__dict__)
 
     def make_network(self, N_inputs=None, N_outputs=None, hidden=64, layers=3, activation=torch.nn.CELU(), normalize_input=True, scale_output=True):
+        """Construct the feedforward network and optional scaling layers."""
         if N_inputs is None:
             N_inputs = self.N_x
 

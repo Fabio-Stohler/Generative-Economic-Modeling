@@ -20,11 +20,12 @@ When working on the code please follow the following instruction sets.
 
 4. To run 
 
+
 ## Operating systems
 
-The project was tested on ... machines:
+The project was tested on 2 machines:
 
-1. Machine: Microsoft Windows 11 Pro on a Lenovo Yoga 7 14ITL5 with 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz 4 Core(s), 8 Logical Processors(s)
+1. Machine: Microsoft Windows 11 Pro on a Dell Latitude 5330 with 12th Gen Intel(R) Core(TM) i5-1235U @ 1.30 GHz 10 Core(s), 12 Logical Processors(s)
 
 2. ...
 

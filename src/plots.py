@@ -1,7 +1,10 @@
+"""Plotting utilities used to visualize surrogate performance and errors."""
+
+# Third-party dependencies
 from matplotlib import pyplot as plt
 from matplotlib.ticker import AutoMinorLocator, NullLocator
-import torch
 import numpy as np
+import torch
 
 
 # %% Helper function to set up subplots
@@ -27,7 +30,9 @@ def filter_variables(y, y_pred=None, y_naive=None, y_labels=None, plot_vars=None
         indices = [y_labels.index(label) for label in plot_vars if label in y_labels]
         if len(indices) != len(plot_vars):
             missing_vars = set(plot_vars) - set(y_labels)
-            raise ValueError(f"The following variables in plot_vars are missing from y_labels: {missing_vars}")
+            raise ValueError(
+                f"The following variables in plot_vars are missing from y_labels: {missing_vars}"
+            )
     else:
         indices = list(range(len(y_labels)))
 
@@ -55,7 +60,9 @@ def setup_subplots(n_vars, ncol, sub_figsize=(10 / 3, 3)):
         fig, axes: Matplotlib figure and axes.
     """
     nrow = int(np.ceil(n_vars / ncol))
-    fig, axes = plt.subplots(nrow, ncol, figsize=(ncol * sub_figsize[0], nrow * sub_figsize[1]))
+    fig, axes = plt.subplots(
+        nrow, ncol, figsize=(ncol * sub_figsize[0], nrow * sub_figsize[1])
+    )
     axes = np.atleast_1d(axes).flatten()
 
     # Hide empty subplots
@@ -77,6 +84,7 @@ def plot_naive_comparison(
     suptitle=None,
     ncol=3,
 ):
+    # Determine which data to use for evaluation.
     if x_validation is None:
         x = surrogate.data_validation["x"]
     else:
@@ -87,6 +95,7 @@ def plot_naive_comparison(
     else:
         y = y_validation
 
+    # Generate predictions and naive baseline.
     y_pred = surrogate.network(x).detach()
     y_naive = x[:, : y.size(-1)]
 
@@ -134,6 +143,7 @@ def plot_surrogate_validation(
     suptitle=None,
     ncol=3,
 ):
+    # Determine which data to use for evaluation.
     if x_validation is None:
         x = surrogate_LKC.data_validation["x"]
     else:
@@ -144,6 +154,7 @@ def plot_surrogate_validation(
     else:
         y = y_validation
 
+    # Surrogate predictions.
     y_pred = surrogate_LKC.network(x).detach()
 
     # Filter and validate variables
