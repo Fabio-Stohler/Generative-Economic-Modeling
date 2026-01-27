@@ -98,7 +98,7 @@ def construct_single_xy(
     active_eps=None,
     return_torch=True,
     extract_eps=False,
-    verbose=True,
+    verbose=False,
 ):
     """Construct state/control tensors (x, y) from a dataframe slice."""
     if states is None:
