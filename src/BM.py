@@ -7,24 +7,19 @@
 # The results of the simulation are stored in the class and saved via pickle.
 
 # %%
-import torch
-import math
+# Standard library
 from pathlib import Path
-from copy import deepcopy
 import pickle
+
+# Third-party dependencies
+import torch
 from matplotlib import pyplot as plt
-from matplotlib.ticker import AutoMinorLocator, NullLocator
-import numpy as np
+from matplotlib.ticker import AutoMinorLocator
 from tqdm import trange
 
-# Structures to hold the elements of the model
-from structures import Parameters, Ranges, Shocks, State
-
-# Helper functions
+# Local imports
 from helpers import ergodic_sigma
-
-# Surrogate
-from surrogate import Surrogate
+from structures import Parameters, Ranges, Shocks, State
 
 
 class BMModel(object):
