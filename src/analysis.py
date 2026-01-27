@@ -218,20 +218,28 @@ data_C_df = pd.concat(
 partial_datasets = {}
 print("Constructind dataset from all data")
 partial_datasets["all"] = construct_single_xy(
-    data_all_df, active_eps=["ϵ_a", "ϵ_z", "ϵ_mu"]
+    data_all_df, active_eps=["ϵ_a", "ϵ_z", "ϵ_mu"], extract_eps=True
 )
 
 print("Constructing dataset from tfp_zeta data")
-partial_datasets["AB"] = construct_single_xy(data_AB_df, active_eps=["ϵ_a", "ϵ_z"])
+partial_datasets["AB"] = construct_single_xy(
+    data_AB_df, active_eps=["ϵ_a", "ϵ_z"], extract_eps=True
+)
 
 print("Constructing dataset from tfp_delta data")
-partial_datasets["AC"] = construct_single_xy(data_AC_df, active_eps=["ϵ_a", "ϵ_mu"])
+partial_datasets["AC"] = construct_single_xy(
+    data_AC_df, active_eps=["ϵ_a", "ϵ_mu"], extract_eps=True
+)
 
 print("Constructing dataset from zeta_delta data")
-partial_datasets["BC"] = construct_single_xy(data_BC_df, active_eps=["ϵ_z", "ϵ_mu"])
+partial_datasets["BC"] = construct_single_xy(
+    data_BC_df, active_eps=["ϵ_z", "ϵ_mu"], extract_eps=True
+)
 
 print("Constructing dataset from delta data")
-partial_datasets["C"] = construct_single_xy(data_C_df, active_eps=["ϵ_mu"])
+partial_datasets["C"] = construct_single_xy(
+    data_C_df, active_eps=["ϵ_mu"], extract_eps=True
+)
 
 
 # %% Combine the datasets
