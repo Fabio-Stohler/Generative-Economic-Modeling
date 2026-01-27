@@ -12,7 +12,7 @@ from tqdm import trange
 
 # Local imports
 import plots
-from analysis_helpers import (
+from helpers import (
     ar1_lognormal_draws,
     calculate_EEE_BM,
     calculate_EEE_BM_Ana,
