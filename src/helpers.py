@@ -112,7 +112,7 @@ def construct_single_xy(
     if active_eps is None:
         active_eps = ["ϵ_a", "ϵ_z", "ϵ_mu"]
 
-    # Back out eps from the states
+    # Back out eps from the exogenous states when requested.
     if extract_eps:
         # Drop the eps columns if they exist
         for ep in eps:
@@ -120,11 +120,12 @@ def construct_single_xy(
                 data = data.drop(columns=[ep])
 
         # Estimate the AR coefficients from the shock data
-        rho, a = estimate_ar1_coefficients(data, states)
+        shock_states = exo_states if exo_states is not None else states
+        rho, a = estimate_ar1_coefficients(data, shock_states)
 
         # Get the innovations for the states
         data_eps = pd.DataFrame()
-        for shock in states:
+        for shock in shock_states:
             data_eps[f"ϵ_{shock.lower()}"] = np.log(data[shock]) - (
                 a[shock] + rho[shock] * np.log(data[shock].shift(1))
             )
@@ -158,15 +159,19 @@ def construct_single_xy(
 
         if extract_eps:
             print("AR coefficients:")
-            for shock in states:
+            for shock in shock_states:
                 print(f"{shock}: rho = {rho[shock]:.4f}, a = {a[shock]:.4f}")
 
         # Summary statistics for the states
         for ep in eps:
+            if ep not in active_eps:
+                continue
             print(f"Summary statistics for {ep}:")
             if ep in data.columns:
                 print(f"Mean of {ep}: {data[ep].mean():.4f}")
                 print(f"Std of {ep}: {data[ep].std():.4f}")
+            else:
+                print(f"{ep} not found in data; enable extract_eps to compute it.")
 
         print("-" * 50)
 
