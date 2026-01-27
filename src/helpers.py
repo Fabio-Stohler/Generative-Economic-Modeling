@@ -1,5 +1,8 @@
+"""Shared helper utilities for simulation, analysis, and diagnostics."""
+
 from __future__ import annotations
 
+# Third-party dependencies
 import numpy as np
 import pandas as pd
 import scipy.stats
@@ -8,6 +11,7 @@ import torch
 
 # %% Function to count parameters of a neural network and visualize the architecture
 def count_parameters(model):
+    """Print the total and trainable parameter counts for a PyTorch model."""
     # Count parameters
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -19,6 +23,7 @@ def count_parameters(model):
 
 # %% Function to calculate the ergodic standard deviation of the AR(1) shock process
 def ergodic_sigma(rho, sigma):
+    """Compute the ergodic standard deviation for an AR(1) process."""
     return (sigma) / (1.0 - rho**2) ** 0.5
 
 
@@ -33,6 +38,7 @@ def simulate_and_save(
     burn=0,
     labnorm=True,
 ):
+    """Simulate datasets for each distribution range and persist BMModel pickles."""
     from BM import BMModel
 
     # For entries in distr_ranges create a model with the name from model_names_list, simulate the data, save the data
@@ -64,10 +70,12 @@ def simulate_and_save(
 
 
 def tensor_to_dataframe(tensor, columns):
+    """Convert a torch tensor to a pandas DataFrame with named columns."""
     return pd.DataFrame(tensor.numpy(), columns=columns)
 
 
 def estimate_ar1_coefficients(df, cols):
+    """Estimate AR(1) coefficients for log processes in a dataframe."""
     rho = {}
     a = {}
     for c in cols:
@@ -92,6 +100,7 @@ def construct_single_xy(
     extract_eps=False,
     verbose=True,
 ):
+    """Construct state/control tensors (x, y) from a dataframe slice."""
     if states is None:
         states = ["K"]
     if controls is None:
@@ -165,6 +174,7 @@ def construct_single_xy(
 
 
 def ar1_lognormal_draws(states, rhos, stds, shocks, log_means):
+    """Draw lognormal AR(1) samples given current states and shocks."""
     # states, rhos, stds, log_means are length-3 tensors on the same device
     # shocks is (N,3)
     # log s_{t+1} = (1−rho) log_mean + rho log s_t + σ ε
@@ -175,24 +185,29 @@ def ar1_lognormal_draws(states, rhos, stds, shocks, log_means):
 
 
 def L(mu, mubar, alpha, beta, gamma, omega):
+    """Closed-form labor policy function."""
     num = mubar * (1 - alpha)
     den = mu * omega * (mubar - alpha * beta)
     return (num / den) ** (1 / gamma)
 
 
 def Y(K, A, Z, L_value, alpha):
+    """Cobb-Douglas production function."""
     return A * K**alpha * (Z * L_value) ** (1 - alpha)
 
 
 def C(Y_value, alpha, beta, mubar):
+    """Consumption policy from output and parameters."""
     return (1 - alpha * beta / mubar) * Y_value
 
 
 def Kp(Y_value, alpha, beta, mubar):
+    """Capital accumulation policy from output and parameters."""
     return alpha * beta * Y_value / mubar
 
 
 def calculate_EEE_BM_Ana(states, future_exo_states, par):
+    """Compute analytical Euler equation error using closed-form policies."""
     Kt, At, Zt, mut = states
     Lt = L(mut, par["mubar"], par["alpha"], par["beta"], par["gamma"], par["omega"])
     Yt = Y(Kt, At, Zt, Lt, par["alpha"])
@@ -221,6 +236,7 @@ def calculate_EEE_BM_Ana(states, future_exo_states, par):
 
 
 def calculate_EEE_BM(states, surrogate, future_exo_states, par):
+    """Compute Euler equation error using surrogate model predictions."""
     model = surrogate.network
     model.eval()
     with torch.no_grad():
@@ -252,6 +268,7 @@ def calculate_EEE_BM(states, surrogate, future_exo_states, par):
 
 
 def simulate_BM(states, surrogate, shocks_prime, device):
+    """Advance the BM state one step using the surrogate model."""
     x = torch.ones(1, 4, device=device) * states
 
     # determine next periods capital stock
@@ -263,6 +280,7 @@ def simulate_BM(states, surrogate, shocks_prime, device):
 
 
 def standardized_moments(data):
+    """Compute mean, std, skewness, and kurtosis for a series."""
     mean = np.mean(data)
     std = np.std(data)
     skewness = scipy.stats.skew(data)

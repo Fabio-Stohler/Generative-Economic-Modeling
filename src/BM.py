@@ -1,6 +1,8 @@
+"""Brock-Mirman analytical model implementation and simulation utilities."""
+
 # %% [markdown]
 # # Code for "Generative Economic Modeling"
-
+#
 # This code solves and simulates the analytical version of the Brock-Mirman model.
 # For convenience, the model is written in the form of a class, which can be instantiated with the desired parameters.
 # The class either draws random parameters from a normal distribution or uses the parameters provided by the user.
@@ -28,6 +30,7 @@ class BMModel(object):
     """
 
     def __init__(self, parameters, ranges, shocks) -> None:
+        # Initialize parameter/range/shock containers used throughout the model.
         self.range = Ranges(parameters, ranges)
         self.shock = Shocks(shocks)
         self.par = Parameters(parameters)
@@ -40,12 +43,14 @@ class BMModel(object):
         self.dataset_keys = None
 
     def to(self, device):
+        # Move internal tensors to the requested device.
         self.par.to(device)
         self.par_draw.to(device)
         self.ss.to(device)
         self.state.to(device)
 
     def save(self, path, name="model"):
+        """Persist a pickled BMModel instance to disk."""
         # Create directory
         Path(path).mkdir(parents=True, exist_ok=True)
 
@@ -56,11 +61,13 @@ class BMModel(object):
 
     @classmethod
     def load(cls, path):
+        """Load a pickled BMModel instance from disk."""
         # Load the object
         with open(path, "rb") as f:
             return pickle.load(f)
 
     def load_attributes(self, path):
+        """Load attributes from a saved BMModel and update the current instance."""
         # Load attributes
         with open(path, "rb") as f:
             load = pickle.load(f)

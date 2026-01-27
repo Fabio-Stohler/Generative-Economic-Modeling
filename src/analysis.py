@@ -1,3 +1,6 @@
+# %% 
+"""Run analysis workflow for the Brock-Mirman surrogate experiments."""
+
 # %%
 # Standard library
 from pathlib import Path
