@@ -5,8 +5,6 @@ import pandas as pd
 import scipy.stats
 import torch
 
-from BM import BMModel
-
 
 # %% Function to count parameters of a neural network and visualize the architecture
 def count_parameters(model):
@@ -35,6 +33,8 @@ def simulate_and_save(
     burn=0,
     labnorm=True,
 ):
+    from BM import BMModel
+
     # For entries in distr_ranges create a model with the name from model_names_list, simulate the data, save the data
     for i, distr_range in enumerate(distr_ranges):
         model = BMModel(par, pars, distr_range)
