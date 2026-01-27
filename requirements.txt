@@ -1,0 +1,9 @@
+cycler==0.12.1
+ipython==9.6.0
+matplotlib==3.10.8
+numpy==2.4.1
+pandas==3.0.0
+scipy==1.17.0
+statsmodels==0.14.5
+torch==2.9.1
+tqdm==4.67.1
