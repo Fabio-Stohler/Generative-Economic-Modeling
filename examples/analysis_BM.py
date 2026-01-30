@@ -5,15 +5,46 @@
 # - Colab: set `COLAB_SETUP = True` in the next cell (or open via the Colab link in the README) to auto-clone and install the repo in your session.
 # - Steps covered: imports & config, data generation/loading, preprocessing, surrogate fitting, evaluation & plots.
 
-# %%
-# Standard library
+# %% Optional: Colab setup (run first in Colab)
 from pathlib import Path
 import sys
-import importlib
 import os
 import shutil
 import subprocess
 
+COLAB_SETUP = False  # set True in Colab to clone & install this repo
+if COLAB_SETUP:
+    REPO_URL = "https://github.com/Fabio-Stohler/Generative-Economic-Modeling.git"
+    BRANCH = "main"
+    CLONE_DIR = Path("/content/generative-economic-modeling")
+
+    if CLONE_DIR.exists():
+        os.chdir(CLONE_DIR)
+        subprocess.run(["git", "pull"], check=True)
+    else:
+        subprocess.run(
+            ["git", "clone", "--depth", "1", "--branch", BRANCH, REPO_URL, str(CLONE_DIR)],
+            check=True,
+        )
+        os.chdir(CLONE_DIR)
+
+    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-e", "."], check=True)
+    BASE_DIR = CLONE_DIR
+else:
+    try:
+        BASE_DIR = Path(__file__).resolve().parent.parent
+    except NameError:
+        cwd = Path.cwd()
+        BASE_DIR = cwd.parent if cwd.name == "examples" else cwd
+
+# Ensure source is importable without installing the package
+sys.path.insert(0, str(BASE_DIR / "src"))
+
+DATA_DIR = BASE_DIR / "bld" / "data" / "BM"
+FIG_DIR = BASE_DIR / "bld" / "figures" / "BM"
+NN_DIR = BASE_DIR / "bld" / "models" / "BM"
+
+# %%
 # Third-party dependencies
 import numpy as np
 import pandas as pd
@@ -36,37 +67,6 @@ from gem.data import (
 )
 from gem.surrogates import Surrogate
 
-# %% [markdown]
-# ## Optional: Colab setup
-
-# %%
-COLAB_SETUP = False  # set True in Colab to clone & install this repo
-if COLAB_SETUP:
-    REPO_URL = "https://github.com/Fabio-Stohler/Generative-Economic-Modeling.git"
-    BRANCH = "main"
-    CLONE_DIR = Path("/content/generative-economic-modeling")
-    if CLONE_DIR.exists():
-        shutil.rmtree(CLONE_DIR)
-    subprocess.run(
-        ["git", "clone", "--depth", "1", "--branch", BRANCH, REPO_URL, str(CLONE_DIR)],
-        check=True,
-    )
-    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-e", str(CLONE_DIR)], check=True)
-    os.chdir(CLONE_DIR)
-
-# %% Paths and config (local or Colab)
-if COLAB_SETUP:
-    BASE_DIR = CLONE_DIR
-else:
-    try:
-        BASE_DIR = Path(__file__).resolve().parent.parent
-    except NameError:
-        cwd = Path.cwd()
-        BASE_DIR = cwd.parent if cwd.name == "examples" else cwd
-DATA_DIR = BASE_DIR / "bld" / "data" / "BM"
-FIG_DIR = BASE_DIR / "bld" / "figures" / "BM"
-NN_DIR = BASE_DIR / "bld" / "models" / "BM"
-
 
 # %% Check if CUDA is available
 Force_CPU = True
@@ -88,7 +88,6 @@ rerun = False
 
 # Truncation length for dataset
 truncate_length = 10000  # Set to None to use the full dataset
-
 # %% [markdown]
 # ## Reproducibility and plotting defaults
 
