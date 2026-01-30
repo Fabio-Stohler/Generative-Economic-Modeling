@@ -27,17 +27,17 @@ quartodoc:
   package: gem
   dir: reference
   sections:
-    - title: Surrogates
+    - title: Generative surrogate (core)
       contents:
         - surrogates.Surrogate
-    - title: Helpers
-      contents:
-        - data.helpers
-        - data.io_utils
     - title: Model
       contents:
         - model.bm
         - model.bm.BMModel
+    - title: Helpers
+      contents:
+        - data.helpers
+        - data.io_utils
     - title: Data structures
       contents:
         - structures.Parameters
