@@ -36,8 +36,10 @@ To use the code open a shell and execute the following commands.
      - Windows: `venv\Scripts\activate`
      - macOS/Linux: `source venv/bin/activate`
 
-4. Install dependencies:  
-   `pip install -r requirements.txt`
+4. Install the package in editable mode (brings deps):  
+   ```bash
+   pip install -e .
+   ```
 
 ## Run
 With the environment activated:  

@@ -1,4 +1,8 @@
-"""Brock-Mirman analytical model implementation and simulation utilities."""
+"""Brock–Mirman analytical model implementation and simulation utilities.
+
+Main entry point: :class:`BMModel` for simulating datasets and policy functions
+used in surrogate training.
+"""
 
 # %% [markdown]
 # # Code for "Generative Economic Modeling"
