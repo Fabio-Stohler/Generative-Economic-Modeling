@@ -20,8 +20,8 @@ from matplotlib.ticker import AutoMinorLocator
 from tqdm import trange
 
 # Local imports
-from .helpers import ergodic_sigma
-from .structures import Parameters, Ranges, Shocks, State
+from ..data.helpers import ergodic_sigma
+from ..core.structures import Parameters, Ranges, Shocks, State
 
 
 class BMModel(object):

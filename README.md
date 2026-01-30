@@ -48,7 +48,10 @@ To use the code open a shell and execute the following commands.
   - Generate once via Jupytext: `jupytext --to ipynb examples/analysis_BM.py`  
   - Then open/run `examples/analysis_BM.ipynb` in Jupyter/Lab.
 - Docs site:  
-  `quarto render docs` (requires Quarto installed).
+  ```bash
+  # generate API pages via quartodoc then render site
+  quarto render docs
+  ```
 
 ## Tested environments
 - Windows 11 Pro (Dell Latitude 5330, Intel i5-1235U)

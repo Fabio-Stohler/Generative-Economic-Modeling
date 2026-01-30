@@ -16,7 +16,7 @@ from tqdm import trange
 
 # Local imports
 from gem import plots
-from gem.helpers import (
+from gem.data import (
     ar1_lognormal_draws,
     calculate_EEE_BM,
     calculate_EEE_BM_Ana,
@@ -25,10 +25,10 @@ from gem.helpers import (
     simulate_BM,
     standardized_moments,
     tensor_to_dataframe,
+    load_pickle,
 )
-from gem.BM import BMModel
-from gem.surrogate import Surrogate
-from gem.io_utils import load_pickle
+from gem.model import BMModel
+from gem.surrogates import Surrogate
 
 
 def load_dataset(path):

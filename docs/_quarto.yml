@@ -1,38 +1,49 @@
 project:
   type: website
   output-dir: _site
-  render:
-    - index.qmd
-    - bm-example.qmd
-    - api.qmd
+  resources:
+    - reference
+    - objects.json
 
 website:
   title: "Generative Economic Modeling"
+  page-navigation: true
   navbar:
     left:
       - href: index.qmd
         text: Home
       - href: bm-example.qmd
         text: BM Example
-      - href: api.qmd
-        text: API
+      - href: reference/index.qmd
+        text: Reference
 
 format:
   html:
     theme: cosmo
     toc: true
 
-filters:
-  - quartodoc
-
 quartodoc:
+  style: pkgdown
   package: gem
+  dir: reference
   sections:
-    - title: Core API
+    - title: Surrogates
       contents:
-        - BM
-        - helpers
-        - surrogate
-        - structures
-        - plots
-        - io_utils
+        - surrogates.Surrogate
+    - title: Helpers
+      contents:
+        - data.helpers
+        - data.io_utils
+    - title: Model
+      contents:
+        - model.bm
+        - model.bm.BMModel
+    - title: Data structures
+      contents:
+        - core.structures.Parameters
+        - core.structures.Ranges
+        - core.structures.State
+        - core.structures.Shocks
+    - title: Plots
+      contents:
+        - plotting.plots
