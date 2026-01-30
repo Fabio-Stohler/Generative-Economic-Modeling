@@ -14,12 +14,6 @@ import torch
 from matplotlib import pyplot as plt
 from tqdm import trange
 
-# Make repo src importable when running directly
-BASE_DIR = Path(__file__).resolve().parent.parent
-SRC_DIR = BASE_DIR / "src"
-if str(SRC_DIR) not in sys.path:
-    sys.path.insert(0, str(SRC_DIR))
-
 # Local imports
 from gem import plots
 from gem.helpers import (
@@ -34,7 +28,7 @@ from gem.helpers import (
 )
 from gem.BM import BMModel
 from gem.surrogate import Surrogate
-from io_utils import load_pickle
+from gem.io_utils import load_pickle
 
 
 def load_dataset(path):

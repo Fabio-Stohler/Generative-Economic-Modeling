@@ -40,7 +40,7 @@ def simulate_and_save(
 ):
     """Simulate datasets for each distribution range and persist dataset pickles."""
     from .BM import BMModel
-    from ..io_utils import save_pickle
+    from .io_utils import save_pickle
 
     # For entries in distr_ranges create a model with the name from model_names_list, simulate the data, save the data
     for i, distr_range in enumerate(distr_ranges):
