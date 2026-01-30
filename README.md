@@ -3,7 +3,7 @@
 Example code for the analytical real-business-cycle model from *"Generative Economic Modeling"* by H. Kase, M. Rottner, and F. Stohler.
 
 ## Requirements
-- Python 3.9 (tested with Python 3.9.12)
+- Python 3.11
 - Git
 
 ## Setup
@@ -42,10 +42,13 @@ To use the code open a shell and execute the following commands.
    ```
 
 ## Run
-With the environment activated:  
-`python src/analysis.py`
-
-Alternatively, you can open the project in an IDE (e.g., Visual Studio Code) and run `src/analysis.py` from there (make sure the IDE is using the created virtual environment).
+- Script version (recommended):  
+  `python examples/analysis_BM.py`
+- Notebook version:  
+  - Generate once via Jupytext: `jupytext --to ipynb examples/analysis_BM.py`  
+  - Then open/run `examples/analysis_BM.ipynb` in Jupyter/Lab.
+- Docs site:  
+  `quarto render docs` (requires Quarto installed).
 
 ## Tested environments
 - Windows 11 Pro (Dell Latitude 5330, Intel i5-1235U)
