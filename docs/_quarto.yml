@@ -1,6 +1,10 @@
 project:
   type: website
   output-dir: _site
+  render:
+    - index.qmd
+    - bm-example.qmd
+    - api.qmd
 
 website:
   title: "Generative Economic Modeling"
@@ -10,8 +14,6 @@ website:
         text: Home
       - href: bm-example.qmd
         text: BM Example
-      - href: bm-cleanup-plan.md
-        text: BM Cleanup Plan
       - href: api.qmd
         text: API
 
