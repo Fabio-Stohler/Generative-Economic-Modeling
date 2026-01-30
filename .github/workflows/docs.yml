@@ -36,12 +36,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install "quartodoc==0.11.1"
 
-      - name: Sync examples into docs
-        run: |
-          mkdir -p docs/examples
-          cp examples/analysis_BM.py docs/examples/
-          cp examples/analysis_BM.ipynb docs/examples/
-
       - name: Build API docs (quartodoc)
         env:
           PYTHONPATH: src
