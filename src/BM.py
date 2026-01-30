@@ -385,19 +385,49 @@ class BMModel(object):
         labnorm=True,
         store: bool = True,
     ):
-        """Simulate datasets; return (dataset, keys). Optionally store on self for compatibility."""
-        from data_pipeline import simulate_dataset as _simulate_dataset
+        """
+        Simulate the model for multiple parameter draws.
 
-        dataset, keys = _simulate_dataset(
-            model=self,
-            par=par,
-            draw=draw,
-            burn=burn,
-            steps=steps,
-            device=device,
-            seed=seed,
-            labnorm=labnorm,
-        )
+        Returns (dataset, keys). Optionally stores on the instance for compatibility.
+        """
+        x = []
+        y = []
+        for _ in trange(draw):
+            # Draw parameter vector
+            par = self.draw_parameters(shape=(1,), device=device)
+
+            # Simulate
+            states, controls, shocks = self.simulate(
+                par, burn, steps, device, seed, labnorm
+            )
+
+            # Convert par, results, shocks to tensors and stack
+            v_par = torch.cat([value.unsqueeze(0) for value in par.values()], dim=-1).expand(
+                steps, -1
+            )
+            v_states = torch.stack([value for value in states.values()], dim=-1)
+            v_controls = torch.stack([value for value in controls.values()], dim=-1)
+            v_shocks = torch.stack([value for value in shocks.values()], dim=-1)
+
+            # Stack results
+            temp_x = torch.cat([v_states, v_par], dim=-1)[:-1, :]
+            temp_y = torch.cat([v_controls], dim=-1)
+
+            x.append(temp_x)
+            y.append(temp_y)
+
+        # Stack over draws
+        x = torch.stack(x, dim=0)
+        y = torch.stack(y, dim=0)
+
+        # Keys
+        k_par = par.keys()
+        k_state = list(states.keys())
+        k_cont = list(controls.keys())
+        k_shocks = list(shocks.keys())
+        keys = k_state + k_cont + k_par + k_shocks
+
+        dataset = {"x": x, "y": y}
 
         if store:
             self.dataset = dataset
