@@ -25,5 +25,11 @@ format:
 quartodoc:
   package: gem
   sections:
-    - path: gem
-      title: Core API
+    - title: Core API
+      contents:
+        - BM
+        - helpers
+        - surrogate
+        - structures
+        - plots
+        - io_utils
