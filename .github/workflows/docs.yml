@@ -1,10 +1,21 @@
-name: Build Docs (manual)
+name: Deploy Docs to Pages
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
-  build-docs:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -41,15 +52,22 @@ jobs:
           cp examples/analysis_BM.ipynb docs/examples/
 
       - name: Build API docs (quartodoc)
-        run: |
-          quartodoc build --config docs/_quarto.yml
+        run: quartodoc build --config docs/_quarto.yml
 
       - name: Render site (Quarto)
-        run: |
-          quarto render docs
+        run: quarto render docs
 
       - name: Upload site artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: site
           path: docs/_site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
