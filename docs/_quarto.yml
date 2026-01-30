@@ -15,7 +15,7 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - href: examples/analysis_BM.ipynb
+      - href: examples/analysis_BM.html
         text: Brock–Mirman Notebook
       - href: reference/index.qmd
         text: Reference
