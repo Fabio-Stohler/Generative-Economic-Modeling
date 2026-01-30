@@ -332,7 +332,7 @@ training_settings = {
 
 
 # %% Training or loading the surrogate models
-models_path = "../bld/models/BM/"
+models_path = "bld/models/BM/"
 Path(models_path).mkdir(parents=True, exist_ok=True)
 surrogates = {}
 
@@ -343,13 +343,13 @@ if retrain:
         surrogate = Surrogate(data=data)
         surrogate.make_network(**nn_settings)
         surrogate.train(**training_settings[key], device=device, shuffle_data=True)
-        surrogate.save(f"{models_path}surrogate_{key}")
+        surrogate.save(f"{models_path}surrogate_{key}.pkl")
         surrogates[key] = surrogate
 else:
     # Load the surrogate models
     for key in combinations.keys():
         surrogate = Surrogate()
-        surrogate.load_attributes(f"{models_path}surrogate_{key}/surrogate.pkl")
+        surrogate.load_attributes(f"{models_path}surrogate_{key}.pkl")
         surrogates[key] = surrogate
 
 

@@ -102,13 +102,19 @@ class Surrogate:
 
         return data_train, data_validation
 
-    def save(self, path, name="surrogate"):
-        """Save the surrogate to disk via pickle."""
-        # Create directory
-        Path(path).mkdir(parents=True, exist_ok=True)
+    def _resolve_path(self, path, name="surrogate"):
+        """Return a pickle file path, accepting either a file or directory."""
+        p = Path(path)
+        if p.suffix == ".pkl":
+            p.parent.mkdir(parents=True, exist_ok=True)
+            return p
+        p.mkdir(parents=True, exist_ok=True)
+        return p / f"{name}.pkl"
 
-        # Save the object
-        with open(f"{path}/{name}.pkl", "wb") as file:
+    def save(self, path, name="surrogate"):
+        """Save the surrogate to disk via pickle. Accepts file or directory path."""
+        file_path = self._resolve_path(path, name)
+        with open(file_path, "wb") as file:
             pickle.dump(self, file)
 
     @classmethod
@@ -120,10 +126,15 @@ class Surrogate:
 
         return obj
 
-    def load_attributes(self, path):
-        """Populate attributes from a saved surrogate object."""
-        # Load the object
-        with open(path, "rb") as f:
+    def load_attributes(self, path, name="surrogate"):
+        """Populate attributes from a saved surrogate object.
+
+        Accepts either a pickle file path or a directory containing `surrogate.pkl`.
+        """
+        p = Path(path)
+        if p.is_dir():
+            p = p / f"{name}.pkl"
+        with open(p, "rb") as f:
             obj = pickle.load(f)
 
         # Populate attributes
