@@ -14,6 +14,8 @@ website:
         text: Home
       - href: bm-example.qmd
         text: BM Example
+      - href: examples/analysis_BM.ipynb
+        text: Brock–Mirman Notebook
       - href: reference/index.qmd
         text: Reference
 
