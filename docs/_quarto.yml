@@ -22,6 +22,9 @@ format:
     theme: cosmo
     toc: true
 
+filters:
+  - quartodoc
+
 quartodoc:
   package: gem
   sections:
