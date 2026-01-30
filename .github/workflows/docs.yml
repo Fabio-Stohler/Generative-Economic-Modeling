@@ -29,7 +29,7 @@ jobs:
       - name: Install Quarto
         uses: quarto-dev/quarto-actions/setup@v2
         with:
-          version: "1.4.556"
+          version: "1.9.16"
 
       - name: Install docs deps only
         run: |
