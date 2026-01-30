@@ -22,8 +22,8 @@ from matplotlib import pyplot as plt
 from tqdm import trange
 
 # Local imports
-import plots
-from helpers import (
+from gem import plots
+from gem.helpers import (
     ar1_lognormal_draws,
     calculate_EEE_BM,
     calculate_EEE_BM_Ana,
@@ -33,8 +33,8 @@ from helpers import (
     standardized_moments,
     tensor_to_dataframe,
 )
-from BM import BMModel
-from surrogate import Surrogate
+from gem.BM import BMModel
+from gem.surrogate import Surrogate
 from io_utils import load_pickle
 
 # Paths and config
