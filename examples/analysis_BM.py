@@ -9,7 +9,6 @@
 from pathlib import Path
 import sys
 import os
-import shutil
 import subprocess
 
 COLAB_SETUP = False  # set True in Colab to clone & install this repo
@@ -595,7 +594,6 @@ for name in ["F", "ABC"]:
 
 
 # %% plot the EEE over time
-importlib.reload(plots)
 plots.plot_euler_error_histogram(
     EEE["F"],
     EEE["ABC"],

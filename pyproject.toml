@@ -31,3 +31,8 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["gem*"]
+
+[tool.flake8]
+ignore = [
+    "E402",  # module level import not at top (needed for notebooks/paths)
+]
