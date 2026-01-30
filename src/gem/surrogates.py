@@ -48,7 +48,7 @@ class ScaleLayer(torch.nn.Module):
 
 # %% Surrogate neural network that maps from x to y
 class Surrogate:
-    """Wrap a feedforward network plus training helpers for surrogate modeling."""
+    """Feedforward surrogate model with utilities for training, saving, loading, and evaluation."""
     def __init__(self, data=None):
         # Convert dataset to torch tensors if provided.
         if data is not None:
@@ -70,13 +70,13 @@ class Surrogate:
         self.cm = None
 
     def flatten(self, data):
-        # Flatten last dimension so samples are 2D (N x features).
+        """Flatten batch/time dims so each sample is 2D (N x features)."""
         for k in data.keys():
             data[k] = data[k].flatten(start_dim=0, end_dim=-2)
         return data
 
     def shuffle(self, data):
-        # Shuffle samples in unison for x/y pairs.
+        """Shuffle samples in unison across all tensors in `data`."""
         N_sample = data["x"].shape[0]
 
         # Randomly shuffle the dataset
@@ -87,7 +87,7 @@ class Surrogate:
         return data
 
     def split_data(self, data, validation_share=0.2, shuffle=True):
-        # Split a dataset into train/validation folds.
+        """Split a dataset dict into train/validation folds."""
         N_sample = data["x"].shape[0]
         N_train = int(N_sample * (1 - validation_share))
 
@@ -197,6 +197,7 @@ class Surrogate:
         self.network = torch.nn.Sequential(*layer_list)
 
     def train(self, batch=64, epochs=10000, device="cpu", lr=1e-3, eta_min=1e-6, validation_share=0.2, print_after=1000, loss_fun="mse", shuffle_data=True, log_loss=False):
+        """Train the surrogate network on the provided dataset."""
         # Create optimizer and scheduler
         optimizer = torch.optim.AdamW(self.network.parameters(), lr=lr)
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=eta_min)
