@@ -51,8 +51,8 @@ from gem.data import (
 from gem.model import BMModel
 from gem.surrogates import Surrogate
 
-# Paths and config
-BASE_DIR = Path(__file__).resolve().parent.parent
+# Paths and config (relative to current working directory in Colab)
+BASE_DIR = Path.cwd()
 DATA_DIR = BASE_DIR / "bld" / "data" / "BM"
 FIG_DIR = BASE_DIR / "bld" / "figures" / "BM"
 NN_DIR = BASE_DIR / "bld" / "models" / "BM"
