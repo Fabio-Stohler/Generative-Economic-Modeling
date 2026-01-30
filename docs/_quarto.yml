@@ -19,3 +19,9 @@ format:
   html:
     theme: cosmo
     toc: true
+
+quartodoc:
+  package: gem
+  sections:
+    - path: gem
+      title: Core API
