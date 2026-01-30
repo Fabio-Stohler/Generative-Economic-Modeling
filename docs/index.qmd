@@ -7,6 +7,10 @@ page-layout: article
 
 This site documents the Brock–Mirman surrogate example from the paper “Generative Economic Modeling.” Use the navbar to jump to the notebook or API reference.
 
+**Quick links:**  
+- Colab notebook: <https://colab.research.google.com/github/Fabio-Stohler/Generative-Economic-Modeling/blob/main/examples/analysis_BM_colab.ipynb>  
+- GitHub repo: <https://github.com/Fabio-Stohler/Generative-Economic-Modeling>
+
 ## Quick start
 
 1. Create a Python 3.11 virtualenv and install requirements:
@@ -35,3 +39,22 @@ This site documents the Brock–Mirman surrogate example from the paper “Gener
 - `examples/analysis_BM_colab.ipynb` — Colab-ready notebook with setup cell.
 - `bld/` — generated data/models/figures (ignored in git).
 - `docs/` — Quarto sources (this site).
+
+## Citation
+
+If you use the code, please cite:
+
+- Kase, H., Rottner, M., & Stohler, F. (2025, December 2). *Generative economic modeling* (BIS Working Papers No. 1312). Bank for International Settlements. <https://www.bis.org/publ/work1312.htm>
+
+```bibtex
+@techreport{kase_rottner_stohler_2025_generative_economic_modeling,
+  title       = {Generative economic modeling},
+  author      = {Kase, Hanno and Rottner, Matthias and Stohler, Fabio},
+  year        = {2025},
+  month       = dec,
+  number      = {1312},
+  institution = {Bank for International Settlements},
+  series      = {BIS Working Papers},
+  url         = {https://www.bis.org/publ/work1312.htm}
+}
+```

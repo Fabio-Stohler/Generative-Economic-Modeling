@@ -2,6 +2,9 @@
 
 Example code for the analytical real-business-cycle model from *"Generative Economic Modeling"* by H. Kase, M. Rottner, and F. Stohler.
 
+- Docs site: https://fabio-stohler.github.io/Generative-Economic-Modeling/
+- Colab notebook: https://colab.research.google.com/github/Fabio-Stohler/Generative-Economic-Modeling/blob/main/examples/analysis_BM_colab.ipynb
+
 ## Requirements
 - Python 3.11
 - Git
@@ -49,11 +52,7 @@ To use the code open a shell and execute the following commands.
   - Then open/run `examples/analysis_BM.ipynb` in Jupyter/Lab.
 - Colab version:  
   [Open in Colab](https://colab.research.google.com/github/Fabio-Stohler/Generative-Economic-Modeling/blob/main/examples/analysis_BM_colab.ipynb) (includes a setup cell to install the package).
-- Docs site:  
-  ```bash
-  # generate API pages via quartodoc then render site
-  quarto render docs
-  ```
+- Docs site: https://fabio-stohler.github.io/Generative-Economic-Modeling/
 
 ## Tested environments
 - Windows 11 Pro (Dell Latitude 5330, Intel i5-1235U)
