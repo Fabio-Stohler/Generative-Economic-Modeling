@@ -1,4 +1,8 @@
-"""Brock-Mirman analytical model implementation and simulation utilities."""
+"""Brock–Mirman analytical model implementation and simulation utilities.
+
+Main entry point: :class:`BMModel` for simulating datasets and policy functions
+used in surrogate training.
+"""
 
 # %% [markdown]
 # # Code for "Generative Economic Modeling"
@@ -9,10 +13,6 @@
 # The results of the simulation are stored in the class and saved via pickle.
 
 # %%
-# Standard library
-from pathlib import Path
-import pickle
-
 # Third-party dependencies
 import torch
 from matplotlib import pyplot as plt
@@ -20,8 +20,8 @@ from matplotlib.ticker import AutoMinorLocator
 from tqdm import trange
 
 # Local imports
-from helpers import ergodic_sigma
-from structures import Parameters, Ranges, Shocks, State
+from ..data.helpers import ergodic_sigma
+from ..structures import Parameters, Ranges, Shocks, State
 
 
 class BMModel(object):
@@ -48,32 +48,6 @@ class BMModel(object):
         self.par_draw.to(device)
         self.ss.to(device)
         self.state.to(device)
-
-    def save(self, path, name="model"):
-        """Persist a pickled BMModel instance to disk."""
-        # Create directory
-        Path(path).mkdir(parents=True, exist_ok=True)
-
-        # Save BMModel object
-        self.to("cpu")
-        with open(f"{path}/{name}.pkl", "wb") as f:
-            pickle.dump(self, f)
-
-    @classmethod
-    def load(cls, path):
-        """Load a pickled BMModel instance from disk."""
-        # Load the object
-        with open(path, "rb") as f:
-            return pickle.load(f)
-
-    def load_attributes(self, path):
-        """Load attributes from a saved BMModel and update the current instance."""
-        # Load attributes
-        with open(path, "rb") as f:
-            load = pickle.load(f)
-
-        # Populate attributes
-        self.__dict__.update(load.__dict__)
 
     def labor(self, state, par=None):
         """
@@ -414,14 +388,16 @@ class BMModel(object):
         device="cpu",
         seed=None,
         labnorm=True,
+        store: bool = True,
     ):
         """
-        Simulate the model for different parameter draws.
-        """
+        Simulate the model for multiple parameter draws.
 
+        Returns (dataset, keys). Optionally stores on the instance for compatibility.
+        """
         x = []
         y = []
-        for i in trange(draw):
+        for _ in trange(draw):
             # Draw parameter vector
             par = self.draw_parameters(shape=(1,), device=device)
 
@@ -431,22 +407,21 @@ class BMModel(object):
             )
 
             # Convert par, results, shocks to tensors and stack
-            v_par = torch.cat(
-                [value.unsqueeze(0) for value in par.values()], dim=-1
-            ).expand(steps, -1)
-            v_states = torch.stack([value for key, value in states.items()], dim=-1)
-            v_controls = torch.stack([value for key, value in controls.items()], dim=-1)
-            v_shocks = torch.stack([value for key, value in shocks.items()], dim=-1)
+            v_par = torch.cat([value.unsqueeze(0) for value in par.values()], dim=-1).expand(
+                steps, -1
+            )
+            v_states = torch.stack([value for value in states.values()], dim=-1)
+            v_controls = torch.stack([value for value in controls.values()], dim=-1)
+            v_shocks = torch.stack([value for value in shocks.values()], dim=-1)
 
             # Stack results
             temp_x = torch.cat([v_states, v_par], dim=-1)[:-1, :]
             temp_y = torch.cat([v_controls], dim=-1)
 
-            # Append to list
             x.append(temp_x)
             y.append(temp_y)
 
-        # Stack
+        # Stack over draws
         x = torch.stack(x, dim=0)
         y = torch.stack(y, dim=0)
 
@@ -455,12 +430,15 @@ class BMModel(object):
         k_state = list(states.keys())
         k_cont = list(controls.keys())
         k_shocks = list(shocks.keys())
+        keys = k_state + k_cont + k_par + k_shocks
 
-        k_all = k_state + k_cont + k_par + k_shocks
+        dataset = {"x": x, "y": y}
 
-        # Save dataset in class
-        self.dataset = {"x": x, "y": y}
-        self.dataset_keys = k_all
+        if store:
+            self.dataset = dataset
+            self.dataset_keys = keys
+
+        return dataset, keys
 
 
 # %% testing the code

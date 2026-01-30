@@ -1,11 +1,18 @@
-# %% 
-"""Run analysis workflow for the Brock-Mirman surrogate experiments."""
+# %% [markdown]
+# # Brock–Mirman Surrogate Analysis
+#
+# End-to-end walkthrough of the Brock–Mirman surrogate pipeline.
+# - Colab: set `COLAB_SETUP = True` in the next cell (or open via the Colab link in the README) to auto-clone and install the repo in your session.
+# - Steps covered: imports & config, data generation/loading, preprocessing, surrogate fitting, evaluation & plots.
 
 # %%
 # Standard library
 from pathlib import Path
 import sys
 import importlib
+import os
+import shutil
+import subprocess
 
 # Third-party dependencies
 import numpy as np
@@ -25,20 +32,41 @@ from gem.data import (
     simulate_BM,
     standardized_moments,
     tensor_to_dataframe,
-    load_pickle,
+    load_dataset,
 )
-from gem.model import BMModel
 from gem.surrogates import Surrogate
 
+# %% [markdown]
+# ## Optional: Colab setup
 
-def load_dataset(path):
-    """Load a dataset pickle saved either as a dict or a BMModel with a dataset attribute."""
-    obj = load_pickle(path)
-    if isinstance(obj, dict) and "x" in obj:
-        return obj
-    if hasattr(obj, "dataset"):
-        return obj.dataset
-    raise ValueError(f"Unexpected dataset format in {path}")
+# %%
+COLAB_SETUP = False  # set True in Colab to clone & install this repo
+if COLAB_SETUP:
+    REPO_URL = "https://github.com/Fabio-Stohler/Generative-Economic-Modeling.git"
+    BRANCH = "main"
+    CLONE_DIR = Path("/content/generative-economic-modeling")
+    if CLONE_DIR.exists():
+        shutil.rmtree(CLONE_DIR)
+    subprocess.run(
+        ["git", "clone", "--depth", "1", "--branch", BRANCH, REPO_URL, str(CLONE_DIR)],
+        check=True,
+    )
+    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-e", str(CLONE_DIR)], check=True)
+    os.chdir(CLONE_DIR)
+
+# %% Paths and config (local or Colab)
+if COLAB_SETUP:
+    BASE_DIR = CLONE_DIR
+else:
+    try:
+        BASE_DIR = Path(__file__).resolve().parent.parent
+    except NameError:
+        cwd = Path.cwd()
+        BASE_DIR = cwd.parent if cwd.name == "examples" else cwd
+DATA_DIR = BASE_DIR / "bld" / "data" / "BM"
+FIG_DIR = BASE_DIR / "bld" / "figures" / "BM"
+NN_DIR = BASE_DIR / "bld" / "models" / "BM"
+
 
 # %% Check if CUDA is available
 Force_CPU = True
@@ -48,15 +76,21 @@ if Force_CPU:
     device = "cpu"
     print("Forcing CPU usage.")
 
-# %% Constants and lists
-# retrain the full surrogate model
-retrain = False
+# %% [markdown]
+# ## Run-time switches
+# - `retrain`: train surrogates (True) or load cached ones (False).
+# - `rerun`: regenerate simulation datasets (True) or load cached pickles (False).
+# - `truncate_length`: cap dataset length for faster experiments.
 
-# Option to rerun all experiments or only load and analyze the models
+# %% Constants and lists
+retrain = False
 rerun = False
 
 # Truncation length for dataset
 truncate_length = 10000  # Set to None to use the full dataset
+
+# %% [markdown]
+# ## Reproducibility and plotting defaults
 
 # %%
 # Fix seed for torch and numpy
@@ -68,6 +102,10 @@ np.random.seed(42)
 plt.rcParams.update({"font.size": 13})
 
 
+# %% [markdown]
+# ## Data generation settings
+
+# %%
 # simulate data
 # Settings for the experiment in general
 experiment_settings = {
@@ -77,9 +115,9 @@ experiment_settings = {
     "labnorm": True,
     "normalize_input": True,
     "scale_output": False,
-    "model_save_path": "../bld/data/BM/",
-    "fig_save_path": "../bld/figures/BM/",
-    "nn_save_path": "../bld/models/BM/",
+    "model_save_path": str(DATA_DIR) + "/",
+    "fig_save_path": str(FIG_DIR) + "/",
+    "nn_save_path": str(NN_DIR) + "/",
 }
 
 # Specify the parameters, ranges and distributions for the experiment
@@ -152,6 +190,10 @@ distr_C = {
 
 distr_ranges = [distr_F, distr_AB, distr_AC, distr_BC, distr_A, distr_B, distr_C]
 
+# %% [markdown]
+# ## Data generation (simulate or load cached pickles)
+
+# %%
 # simulate the models
 if rerun:
     simulate_and_save(
@@ -176,16 +218,15 @@ data_B = load_dataset(experiment_settings["model_save_path"] + "B.pkl")
 data_C = load_dataset(experiment_settings["model_save_path"] + "C.pkl")
 
 
+# %% [markdown]
+# ## Preprocess datasets (reshape and merge)
+
 #  %% Join the first and second dimension for "x" and "y" in each dataset
 for data in [data_all, data_AB, data_AC, data_BC, data_A, data_B, data_C]:
     for key in ["x", "y"]:
         if key in data and data[key] is not None and data[key].ndim >= 2:
             shape = data[key].shape
-            data[key] = (
-                data[key].reshape(-1, *shape[2:])
-                if data[key].ndim > 2
-                else data[key].reshape(-1, shape[-1])
-            )
+            data[key] = data[key].reshape(-1, *shape[2:]) if data[key].ndim > 2 else data[key].reshape(-1, shape[-1])
 
 
 # extract the first four variables of x, and the last two variables of y, and drop the last row
@@ -229,29 +270,19 @@ data_C_df = pd.concat(
 # %% Construct datasets for all models
 partial_datasets = {}
 print("Constructind dataset from all data")
-partial_datasets["all"] = construct_single_xy(
-    data_all_df, active_eps=["ϵ_a", "ϵ_z", "ϵ_mu"], extract_eps=True
-)
+partial_datasets["all"] = construct_single_xy(data_all_df, active_eps=["ϵ_a", "ϵ_z", "ϵ_mu"], extract_eps=True)
 
 print("Constructing dataset from tfp_zeta data")
-partial_datasets["AB"] = construct_single_xy(
-    data_AB_df, active_eps=["ϵ_a", "ϵ_z"], extract_eps=True
-)
+partial_datasets["AB"] = construct_single_xy(data_AB_df, active_eps=["ϵ_a", "ϵ_z"], extract_eps=True)
 
 print("Constructing dataset from tfp_delta data")
-partial_datasets["AC"] = construct_single_xy(
-    data_AC_df, active_eps=["ϵ_a", "ϵ_mu"], extract_eps=True
-)
+partial_datasets["AC"] = construct_single_xy(data_AC_df, active_eps=["ϵ_a", "ϵ_mu"], extract_eps=True)
 
 print("Constructing dataset from zeta_delta data")
-partial_datasets["BC"] = construct_single_xy(
-    data_BC_df, active_eps=["ϵ_z", "ϵ_mu"], extract_eps=True
-)
+partial_datasets["BC"] = construct_single_xy(data_BC_df, active_eps=["ϵ_z", "ϵ_mu"], extract_eps=True)
 
 print("Constructing dataset from delta data")
-partial_datasets["C"] = construct_single_xy(
-    data_C_df, active_eps=["ϵ_mu"], extract_eps=True
-)
+partial_datasets["C"] = construct_single_xy(data_C_df, active_eps=["ϵ_mu"], extract_eps=True)
 
 
 # %% Combine the datasets
@@ -331,8 +362,11 @@ training_settings = {
 }
 
 
+# %% [markdown]
+# ## Train or load surrogates
+
 # %% Training or loading the surrogate models
-models_path = "bld/models/BM/"
+models_path = str(NN_DIR) + "/"
 Path(models_path).mkdir(parents=True, exist_ok=True)
 surrogates = {}
 
@@ -361,8 +395,11 @@ for key, surrogate in surrogates.items():
     surrogate.data_train["x"] = surrogate.data_train["x"].to("cpu")
     surrogate.data_train["y"] = surrogate.data_train["y"].to("cpu")
 
+# %% [markdown]
+# ## Evaluation & plots
+
 # %% Figures
-figures_path = "../bld/figures/BM/"
+figures_path = str(FIG_DIR) + "/"
 figure_suffix = ""
 Path(figures_path).mkdir(parents=True, exist_ok=True)
 
@@ -406,7 +443,7 @@ plots.plot_error_histogram_three(
     y_labels=["K", "C", "L"],
     plot_vars=["K"],
     save_name="error_histogram_three",
-    save_path="../bld/figures/BM/",
+    save_path=figures_path,
     ncol=1,
     sub_figsize=(6, 4),
     x_range=(-0.1, 0.1),
@@ -427,7 +464,7 @@ plots.plot_error_histogram_three(
     y_labels=["K", "C", "L"],
     plot_vars=["C", "L"],
     save_name="error_histogram_three_other_variables",
-    save_path="../bld/figures/BM/",
+    save_path=figures_path,
     ncol=2,
     sub_figsize=(6, 4),
     x_range=(-0.75, 0.75),
@@ -445,7 +482,7 @@ plots.plot_error_histogram_three(
     y_labels=["K", "C", "L"],
     plot_vars=["C", "L"],
     save_name="error_histogram_three_other_variables_zoomed",
-    save_path="../bld/figures/BM/",
+    save_path=figures_path,
     ncol=2,
     sub_figsize=(6, 4),
     x_range=(-0.003, 0.003),
@@ -461,11 +498,7 @@ exo_shocks_BM = data_all["x"][:, 1:4]
 # extract the shocks into a dataframe
 shocks_df = pd.DataFrame(exo_shocks_BM.cpu().numpy(), columns=["A", "Z", "mu"])
 rhos = torch.tensor([0.9, 0.9, 0.0], device=device, dtype=torch.float32)
-log_means = torch.log(
-    torch.tensor(
-        [par["Abar"], par["Zbar"], par["mubar"]], device=device, dtype=torch.float32
-    )
-)
+log_means = torch.log(torch.tensor([par["Abar"], par["Zbar"], par["mubar"]], device=device, dtype=torch.float32))
 stds = torch.tensor([0.05, 0.05, 0.05], device=device)
 log_means[2] = stds[2] ** 2  # set mean of mu to 1
 
@@ -477,7 +510,6 @@ if torch.cuda.is_available():
 # number of Monte Carlo simulations
 N_monte_carlo = 5000
 
-
 # simulate the shocks
 eps = torch.randn(N_monte_carlo // 2, 3, device=device)
 
@@ -485,7 +517,10 @@ eps = torch.randn(N_monte_carlo // 2, 3, device=device)
 eps = torch.cat((eps, -eps), dim=0)
 
 
-# %%setup of the shocks and states
+# %% [markdown]
+# ## Set up shocks and states
+
+# %%
 predict = ["Kp", "C", "L"]
 states = ["K", "A", "Z", "mu"]
 
@@ -502,13 +537,9 @@ EEE_analytical = {}
 print("Static Euler Equation Error at the mean state:")
 for name in ["F", "ABC"]:
     todays_state = data_all["x"][6, :4].to(device)
-    future_exo_states = ar1_lognormal_draws(
-        states=todays_state[1:], rhos=rhos, stds=stds, shocks=eps, log_means=log_means
-    )  # A, Z, mu today
+    future_exo_states = ar1_lognormal_draws(states=todays_state[1:], rhos=rhos, stds=stds, shocks=eps, log_means=log_means)  # A, Z, mu today
     EEE_analytical[name] = calculate_EEE_BM_Ana(todays_state, future_exo_states, par)
-    EEE_static[name] = calculate_EEE_BM(
-        todays_state, surrogates[name], future_exo_states, par
-    )
+    EEE_static[name] = calculate_EEE_BM(todays_state, surrogates[name], future_exo_states, par)
     print(f"BM EEE of {name} at mean state: {EEE_static[name]:.5f}")
     print(f"Analytical EEE of {name} at mean state: {EEE_analytical[name]:.5f}")
 
@@ -555,9 +586,7 @@ for name in ["F", "ABC"]:
         EEE[name].append(EEE_t)
 
         # simulate the economy one period ahead
-        next_state = simulate_BM(
-            todays_state, surrogates[name], exo_shocks_BM[t + 1, :], device=device
-        ).squeeze()
+        next_state = simulate_BM(todays_state, surrogates[name], exo_shocks_BM[t + 1, :], device=device).squeeze()
 
         # update the todays_state variable
         todays_state = next_state.detach().squeeze().clone()
@@ -571,7 +600,7 @@ importlib.reload(plots)
 plots.plot_euler_error_histogram(
     EEE["F"],
     EEE["ABC"],
-    save_path="../bld/figures/BM/",
+    save_path=figures_path,
     save_name="dynamic_euler_error_histogram",
     number_bins=50,
     num_locators_x=5,
@@ -602,9 +631,7 @@ for name, data in [
         Capital[name].append(todays_state[0].item())
 
         # simulate the economy one period ahead
-        next_state = simulate_BM(
-            todays_state, surrogates[name], data[t + 1, 1:4], device=device
-        ).squeeze()
+        next_state = simulate_BM(todays_state, surrogates[name], data[t + 1, 1:4], device=device).squeeze()
 
         # update the todays_state variable
         todays_state = next_state.detach().squeeze().clone()

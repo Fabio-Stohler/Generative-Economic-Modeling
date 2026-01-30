@@ -38,21 +38,22 @@ def simulate_and_save(
     burn=0,
     labnorm=True,
 ):
-    """Simulate datasets for each distribution range and persist BMModel pickles."""
-    from BM import BMModel
+    """Simulate datasets for each distribution range and persist dataset pickles."""
+    from ..model.bm import BMModel
+    from .io_utils import save_pickle
 
     # For entries in distr_ranges create a model with the name from model_names_list, simulate the data, save the data
     for i, distr_range in enumerate(distr_ranges):
         model = BMModel(par, pars, distr_range)
 
         K = 25
+        dataset = None
         for j in range(K):
-            model.simulate_dataset(draw=draws, steps=steps, burn=burn, labnorm=labnorm)
+            dataset, _ = model.simulate_dataset(
+                draw=draws, steps=steps, burn=burn, labnorm=labnorm, store=True
+            )
             # Check for NaN values in the dataset
-            if (
-                torch.isnan(model.dataset["x"]).any()
-                or torch.isnan(model.dataset["y"]).any()
-            ):
+            if torch.isnan(dataset["x"]).any() or torch.isnan(dataset["y"]).any():
                 print(f"NaN values in the dataset for model {model_names_list[i]}")
             else:
                 print(f"No NaN values in the dataset for model {model_names_list[i]}")
@@ -63,8 +64,8 @@ def simulate_and_save(
                 f"Could not simulate the dataset for model {model_names_list[i]}"
             )
 
-        # Save the model
-        model.save(model_save_path, model_names_list[i])
+        # Save just the dataset for portability
+        save_pickle(dataset, model_save_path, model_names_list[i])
 
     return None
 

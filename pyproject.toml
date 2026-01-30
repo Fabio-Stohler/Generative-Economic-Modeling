@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gem"
+version = "0.1.0"
+description = "Generative Economic Modeling utilities (Brock–Mirman surrogates)"
+authors = [{ name = "H. Kase et al." }]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy==2.4.1",
+    "pandas==3.0.0",
+    "torch==2.9.1",
+    "scipy==1.17.0",
+    "statsmodels==0.14.5",
+    "matplotlib==3.10.8",
+    "tqdm==4.67.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "jupyter==1.1.1",
+    "jupytext==1.16.4",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["gem*"]

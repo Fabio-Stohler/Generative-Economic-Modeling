@@ -1,0 +1,53 @@
+project:
+  type: website
+  output-dir: _site
+  resources:
+    - reference
+    - objects.json
+
+website:
+  title: "Generative Economic Modeling"
+  page-navigation: true
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: examples/analysis_BM.ipynb
+        text: Brock–Mirman Notebook
+      - href: reference/index.qmd
+        text: Reference
+    right:
+      - icon: github
+        href: https://github.com/Fabio-Stohler/Generative-Economic-Modeling
+        aria-label: "GitHub repository"
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+
+quartodoc:
+  style: pkgdown
+  package: gem
+  dir: reference
+  sections:
+    - title: Generative surrogate (core)
+      contents:
+        - surrogates.Surrogate
+    - title: Model
+      contents:
+        - model.bm
+        - model.bm.BMModel
+    - title: Helpers
+      contents:
+        - data.helpers
+        - data.io_utils
+    - title: Data structures
+      contents:
+        - structures.Parameters
+        - structures.Ranges
+        - structures.State
+        - structures.Shocks
+    - title: Plots
+      contents:
+        - plotting.plots
