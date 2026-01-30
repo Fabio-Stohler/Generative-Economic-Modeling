@@ -19,9 +19,9 @@ def simulate_dataset(
     labnorm: bool = True,
 ):
     """
-    Simulate a BMModel across multiple parameter draws and store the dataset on the model.
+    Simulate a BMModel across multiple parameter draws.
 
-    Mirrors the original BMModel.simulate_dataset implementation; behavior unchanged.
+    Returns the dataset; callers can choose to store it on the model if desired.
     """
     x = []
     y = []
@@ -61,8 +61,5 @@ def simulate_dataset(
     k_shocks = list(shocks.keys())
     k_all = k_state + k_cont + k_par + k_shocks
 
-    # Persist on the model for backward compatibility
-    model.dataset = {"x": x, "y": y}
-    model.dataset_keys = k_all
-
-    return model.dataset
+    dataset = {"x": x, "y": y}
+    return dataset, k_all

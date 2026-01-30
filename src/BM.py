@@ -383,11 +383,12 @@ class BMModel(object):
         device="cpu",
         seed=None,
         labnorm=True,
+        store: bool = True,
     ):
-        """Delegate dataset simulation to the data_pipeline helper (behavior unchanged)."""
+        """Simulate datasets; return (dataset, keys). Optionally store on self for compatibility."""
         from data_pipeline import simulate_dataset as _simulate_dataset
 
-        return _simulate_dataset(
+        dataset, keys = _simulate_dataset(
             model=self,
             par=par,
             draw=draw,
@@ -397,6 +398,12 @@ class BMModel(object):
             seed=seed,
             labnorm=labnorm,
         )
+
+        if store:
+            self.dataset = dataset
+            self.dataset_keys = keys
+
+        return dataset, keys
 
 
 # %% testing the code

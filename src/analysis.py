@@ -27,6 +27,17 @@ from helpers import (
 )
 from BM import BMModel
 from surrogate import Surrogate
+from io_utils import load_pickle
+
+
+def load_dataset(path):
+    """Load a dataset pickle saved either as a dict or a BMModel with a dataset attribute."""
+    obj = load_pickle(path)
+    if isinstance(obj, dict) and "x" in obj:
+        return obj
+    if hasattr(obj, "dataset"):
+        return obj.dataset
+    raise ValueError(f"Unexpected dataset format in {path}")
 
 # %% Check if CUDA is available
 Force_CPU = True
@@ -155,13 +166,13 @@ if rerun:
     )
 
 # load the data into a tensor
-data_all = BMModel.load(experiment_settings["model_save_path"] + "F.pkl").dataset
-data_AB = BMModel.load(experiment_settings["model_save_path"] + "AB.pkl").dataset
-data_AC = BMModel.load(experiment_settings["model_save_path"] + "AC.pkl").dataset
-data_BC = BMModel.load(experiment_settings["model_save_path"] + "BC.pkl").dataset
-data_A = BMModel.load(experiment_settings["model_save_path"] + "A.pkl").dataset
-data_B = BMModel.load(experiment_settings["model_save_path"] + "B.pkl").dataset
-data_C = BMModel.load(experiment_settings["model_save_path"] + "C.pkl").dataset
+data_all = load_dataset(experiment_settings["model_save_path"] + "F.pkl")
+data_AB = load_dataset(experiment_settings["model_save_path"] + "AB.pkl")
+data_AC = load_dataset(experiment_settings["model_save_path"] + "AC.pkl")
+data_BC = load_dataset(experiment_settings["model_save_path"] + "BC.pkl")
+data_A = load_dataset(experiment_settings["model_save_path"] + "A.pkl")
+data_B = load_dataset(experiment_settings["model_save_path"] + "B.pkl")
+data_C = load_dataset(experiment_settings["model_save_path"] + "C.pkl")
 
 
 #  %% Join the first and second dimension for "x" and "y" in each dataset
