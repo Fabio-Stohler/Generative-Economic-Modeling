@@ -1,0 +1,10 @@
+---
+title: "API Reference"
+page-layout: article
+---
+
+```{r}
+#| echo: false
+#| warning: false
+# quartodoc will populate content at build time
+```

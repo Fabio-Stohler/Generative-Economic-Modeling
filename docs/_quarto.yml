@@ -12,6 +12,8 @@ website:
         text: BM Example
       - href: bm-cleanup-plan.md
         text: BM Cleanup Plan
+      - href: api.qmd
+        text: API
 
 format:
   html:
