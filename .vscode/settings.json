@@ -1,0 +1,20 @@
+{
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#163417",
+        "titleBar.activeBackground": "#1F4921",
+        "titleBar.activeForeground": "#F8FCF8"
+    },
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true
+    },
+    "black-formatter.args": [
+        "--line-length",
+        "200"
+    ],
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": true,
+    "flake8.args": [
+        "--max-line-length=200"
+    ]
+}
