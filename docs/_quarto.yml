@@ -1,0 +1,19 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "Generative Economic Modeling"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: bm-example.qmd
+        text: BM Example
+      - href: bm-cleanup-plan.md
+        text: BM Cleanup Plan
+
+format:
+  html:
+    theme: cosmo
+    toc: true

@@ -1,0 +1,40 @@
+---
+title: "Generative Economic Modeling"
+page-layout: article
+---
+
+# Welcome
+
+This site documents the Brock–Mirman (BM) surrogate example from the paper “Generative Economic Modeling”. Use the navbar to jump to the worked example or the cleanup plan.
+
+## Quick start
+
+1. Create a Python 3.11 virtualenv and install requirements:
+   ```bash
+   python3.11 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+2. Run the BM analysis (loads pretrained surrogates by default):
+   ```bash
+   python src/analysis.py
+   ```
+3. Convert the example script to a notebook (optional):
+   ```bash
+   jupytext --to ipynb examples/analysis_BM.py
+   ```
+4. Render this site:
+   ```bash
+   quarto render docs
+   ```
+
+## Repository layout (summary)
+
+- `src/` — BM model, helpers, surrogates, and the original analysis script.
+- `examples/analysis_BM.py` — notebook-friendly BM walkthrough.
+- `bld/` — generated data/models/figures (ignored in git).
+- `docs/` — Quarto sources (this site).
+
+## Support
+
+Issues or suggestions? Open a ticket in the repository and mention which page/example needs attention.

@@ -1,0 +1,32 @@
+---
+title: "Brock–Mirman Example"
+page-layout: article
+---
+
+# Overview
+
+This example mirrors `examples/analysis_BM.py`, showing how to simulate the BM model, prepare datasets, train/load surrogates, and plot diagnostics. The script is organized in notebook-friendly cells (`# %%` / `# %% [markdown]`) so you can convert it with Jupytext or run it directly.
+
+## Convert to notebook
+
+```bash
+jupytext --to ipynb examples/analysis_BM.py
+```
+
+## Run the example
+
+```bash
+source venv/bin/activate
+python examples/analysis_BM.py
+```
+
+## Script outline
+
+1. **Setup**: imports, device selection (CPU), experiment settings, paths (`bld/`).
+2. **Data**: load cached pickles from `bld/data/BM/` (or regenerate if you set `rerun=True` in the script).
+3. **Prep**: reshape tensors, build partial datasets, combine/shuffle/truncate.
+4. **Surrogates**: load pretrained networks (set `retrain=True` to retrain).
+5. **Evaluation**: loss curves, error histograms, Euler equation errors, simulated moments.
+6. **Outputs**: figures saved to `bld/figures/BM/` and models to `bld/models/BM/`.
+
+See the source at `examples/analysis_BM.py` for full details and inline commentary.
