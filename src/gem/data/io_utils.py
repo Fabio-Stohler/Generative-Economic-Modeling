@@ -16,3 +16,13 @@ def load_pickle(path):
     """Load a pickled object from disk."""
     with open(path, "rb") as f:
         return pickle.load(f)
+
+
+def load_dataset(path):
+    """Load a dataset saved either as a dict with keys like 'x'/'y' or a BMModel with .dataset."""
+    obj = load_pickle(path)
+    if isinstance(obj, dict) and "x" in obj:
+        return obj
+    if hasattr(obj, "dataset"):
+        return obj.dataset
+    raise ValueError(f"Unexpected dataset format in {path}")

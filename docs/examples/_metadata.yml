@@ -1,5 +1,0 @@
-listing:
-  contents: .
-  sort: "title"
-  type: table
-  fields: [title, description]

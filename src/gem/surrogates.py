@@ -134,6 +134,9 @@ class Surrogate:
         p = Path(path)
         if p.is_dir():
             p = p / f"{name}.pkl"
+        if not p.exists():
+            raise FileNotFoundError(f"Surrogate pickle not found at {p}")
+
         with open(p, "rb") as f:
             obj = pickle.load(f)
 

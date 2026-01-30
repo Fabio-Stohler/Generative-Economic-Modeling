@@ -21,7 +21,7 @@ from tqdm import trange
 
 # Local imports
 from ..data.helpers import ergodic_sigma
-from ..core.structures import Parameters, Ranges, Shocks, State
+from ..structures import Parameters, Ranges, Shocks, State
 
 
 class BMModel(object):

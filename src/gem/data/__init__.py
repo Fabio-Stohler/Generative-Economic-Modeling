@@ -10,7 +10,7 @@ from .helpers import (
     standardized_moments,
     tensor_to_dataframe,
 )
-from .io_utils import load_pickle, save_pickle
+from .io_utils import load_pickle, save_pickle, load_dataset
 
 __all__ = [
     "ar1_lognormal_draws",
@@ -23,4 +23,5 @@ __all__ = [
     "tensor_to_dataframe",
     "load_pickle",
     "save_pickle",
+    "load_dataset",
 ]

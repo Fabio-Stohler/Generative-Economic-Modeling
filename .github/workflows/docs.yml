@@ -34,6 +34,12 @@ jobs:
           pip install -r requirements.txt
           pip install -e .
 
+      - name: Sync examples into docs
+        run: |
+          mkdir -p docs/examples
+          cp examples/analysis_BM.py docs/examples/
+          cp examples/analysis_BM.ipynb docs/examples/
+
       - name: Build API docs (quartodoc)
         run: |
           quartodoc build --config docs/_quarto.yml
