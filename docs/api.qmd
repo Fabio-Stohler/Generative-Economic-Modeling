@@ -3,20 +3,6 @@ title: "API Reference"
 page-layout: article
 ---
 
-```{r}
-#| echo: false
-#| warning: false
-# quartodoc will populate content at build time
+```{quartodoc}
+render: reference
 ```
-
-::: {.callout-note}
-Use quartodoc in your Quarto project configuration to pull docstrings from the `gem` package. Example snippet for `_quarto.yml`:
-
-```yaml
-quartodoc:
-  package: gem
-  sections:
-    - path: gem
-      title: Core API
-```
-:::

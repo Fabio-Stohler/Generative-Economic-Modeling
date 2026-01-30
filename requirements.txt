@@ -9,3 +9,4 @@ torch==2.9.1
 tqdm==4.67.1
 jupyter==1.1.1
 jupytext==1.16.4
+quartodoc==0.7.1
