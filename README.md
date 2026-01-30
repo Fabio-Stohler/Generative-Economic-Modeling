@@ -48,7 +48,7 @@ To use the code open a shell and execute the following commands.
   - Generate once via Jupytext: `jupytext --to ipynb examples/analysis_BM.py`  
   - Then open/run `examples/analysis_BM.ipynb` in Jupyter/Lab.
 - Colab version:  
-  Open `examples/analysis_BM_colab.ipynb` (includes an install cell).
+  [Open in Colab](https://colab.research.google.com/github/Fabio-Stohler/Generative-Economic-Modeling/blob/main/examples/analysis_BM_colab.ipynb) (includes a setup cell to install the package).
 - Docs site:  
   ```bash
   # generate API pages via quartodoc then render site
