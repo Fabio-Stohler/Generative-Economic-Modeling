@@ -1,6 +1,8 @@
-# %% [markdown]
+# + [markdown]
 """
 # Brock–Mirman Surrogate Analysis
+
+Colab: https://colab.research.google.com/github/Fabio-Stohler/Generative-Economic-Modeling/blob/main/examples/analysis_BM_colab.ipynb
 
 This script walks through:
 
@@ -9,9 +11,10 @@ This script walks through:
 3. **Preprocessing** – build shuffled/combined training sets.
 4. **Surrogate fitting** – train or load neural surrogates for policy functions.
 5. **Evaluation & plots** – loss curves, error histograms, Euler errors, moments.
+
 """
 
-# %%
+# +
 # Standard library
 from pathlib import Path
 import sys
@@ -56,7 +59,7 @@ def load_dataset(path):
         return obj.dataset
     raise ValueError(f"Unexpected dataset format in {path}")
 
-# %% Check if CUDA is available
+# + Check if CUDA is available
 Force_CPU = True
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -64,7 +67,7 @@ if Force_CPU:
     device = "cpu"
     print("Forcing CPU usage.")
 
-# %% [markdown]
+# + [markdown]
 """
 ## Run-time switches
 
@@ -73,7 +76,7 @@ if Force_CPU:
 - `truncate_length`: cap dataset length for faster experiments.
 """
 
-# %% Constants and lists
+# + Constants and lists
 # retrain the full surrogate model
 retrain = True
 
@@ -82,138 +85,135 @@ rerun = True
 
 # Truncation length for dataset
 truncate_length = 10000  # Set to None to use the full dataset
+# -
 
-# %% [markdown]
-"""## Reproducibility and plotting defaults"""
+# ## Reproducibility and plotting defaults
 
-# %%
 # Fix seed for torch and numpy
 torch.manual_seed(42)
 np.random.seed(42)
 
-# %% Matplotlib settings
+# + Matplotlib settings
 # Increase the font size
 plt.rcParams.update({"font.size": 13})
+# -
 
 
-# %% [markdown]
-"""## Data generation settings"""
-
+# """## Data generation settings"""
+#
 # simulate data
 # Settings for the experiment in general
-experiment_settings = {
-    "draws": 1,
-    "steps": 10001,
-    "burn": 0,
-    "labnorm": True,
-    "normalize_input": True,
-    "scale_output": False,
-    "model_save_path": str(DATA_DIR) + "/",
-    "fig_save_path": str(FIG_DIR) + "/",
-    "nn_save_path": str(NN_DIR) + "/",
-}
-
+# experiment_settings = {
+#     "draws": 1,
+#     "steps": 10001,
+#     "burn": 0,
+#     "labnorm": True,
+#     "normalize_input": True,
+#     "scale_output": False,
+#     "model_save_path": str(DATA_DIR) + "/",
+#     "fig_save_path": str(FIG_DIR) + "/",
+#     "nn_save_path": str(NN_DIR) + "/",
+# }
+#
 # Specify the parameters, ranges and distributions for the experiment
 # Parameters
-par = {
-    "alpha": 0.33,
-    "beta": 0.96,
-    "omega": 1.0,
-    "gamma": 5.0,
-    "rho_a": 0.9,
-    "rho_z": 0.9,
-    "rho_mu": 0.0,
-    "sigma_a": 0.05,
-    "sigma_z": 0.05,
-    "sigma_mu": 0.05,
-    "Abar": 1.0,
-    "Zbar": 1.0,
-    "mubar": 1.0,
-    "tau_L": 0.0,
-    "tau_K": 0.0,
-    "tau_C": 0.0,
-    "kss": 1.0,
-    "tau_switch": 0.0,
-}
-
+# par = {
+#     "alpha": 0.33,
+#     "beta": 0.96,
+#     "omega": 1.0,
+#     "gamma": 5.0,
+#     "rho_a": 0.9,
+#     "rho_z": 0.9,
+#     "rho_mu": 0.0,
+#     "sigma_a": 0.05,
+#     "sigma_z": 0.05,
+#     "sigma_mu": 0.05,
+#     "Abar": 1.0,
+#     "Zbar": 1.0,
+#     "mubar": 1.0,
+#     "tau_L": 0.0,
+#     "tau_K": 0.0,
+#     "tau_C": 0.0,
+#     "kss": 1.0,
+#     "tau_switch": 0.0,
+# }
+#
 # distr_ranges for the simulation
 # Distributions
-distr_F = {
-    "epsilon_a": torch.distributions.Normal(0.0, 1.0),
-    "epsilon_z": torch.distributions.Normal(0.0, 1.0),
-    "epsilon_mu": torch.distributions.Normal(0.0, 1.0),
-    "tau": torch.distributions.Uniform(0.0, 1.0),
-}
-distr_AB = {
-    "epsilon_a": torch.distributions.Normal(0.0, 1.0),
-    "epsilon_z": torch.distributions.Normal(0.0, 1.0),
-    "epsilon_mu": torch.distributions.Normal(0.0, 1.0e-14),
-    "tau": torch.distributions.Uniform(0.0, 1.0),
-}
-distr_AC = {
-    "epsilon_a": torch.distributions.Normal(0.0, 1.0),
-    "epsilon_z": torch.distributions.Normal(0.0, 1.0e-14),
-    "epsilon_mu": torch.distributions.Normal(0.0, 1.0),
-    "tau": torch.distributions.Uniform(0.0, 1.0),
-}
-distr_BC = {
-    "epsilon_a": torch.distributions.Normal(0.0, 1.0e-14),
-    "epsilon_z": torch.distributions.Normal(0.0, 1.0),
-    "epsilon_mu": torch.distributions.Normal(0.0, 1.0),
-    "tau": torch.distributions.Uniform(0.0, 1.0),
-}
-distr_A = {
-    "epsilon_a": torch.distributions.Normal(0.0, 1.0),
-    "epsilon_z": torch.distributions.Normal(0.0, 1.0e-14),
-    "epsilon_mu": torch.distributions.Normal(0.0, 1.0e-14),
-    "tau": torch.distributions.Uniform(0.0, 1.0),
-}
-distr_B = {
-    "epsilon_a": torch.distributions.Normal(0.0, 1.0e-14),
-    "epsilon_z": torch.distributions.Normal(0.0, 1.0),
-    "epsilon_mu": torch.distributions.Normal(0.0, 1.0e-14),
-    "tau": torch.distributions.Uniform(0.0, 1.0),
-}
-distr_C = {
-    "epsilon_a": torch.distributions.Normal(0.0, 1.0e-14),
-    "epsilon_z": torch.distributions.Normal(0.0, 1.0e-14),
-    "epsilon_mu": torch.distributions.Normal(0.0, 1.0),
-    "tau": torch.distributions.Uniform(0.0, 1.0),
-}
+# distr_F = {
+#     "epsilon_a": torch.distributions.Normal(0.0, 1.0),
+#     "epsilon_z": torch.distributions.Normal(0.0, 1.0),
+#     "epsilon_mu": torch.distributions.Normal(0.0, 1.0),
+#     "tau": torch.distributions.Uniform(0.0, 1.0),
+# }
+# distr_AB = {
+#     "epsilon_a": torch.distributions.Normal(0.0, 1.0),
+#     "epsilon_z": torch.distributions.Normal(0.0, 1.0),
+#     "epsilon_mu": torch.distributions.Normal(0.0, 1.0e-14),
+#     "tau": torch.distributions.Uniform(0.0, 1.0),
+# }
+# distr_AC = {
+#     "epsilon_a": torch.distributions.Normal(0.0, 1.0),
+#     "epsilon_z": torch.distributions.Normal(0.0, 1.0e-14),
+#     "epsilon_mu": torch.distributions.Normal(0.0, 1.0),
+#     "tau": torch.distributions.Uniform(0.0, 1.0),
+# }
+# distr_BC = {
+#     "epsilon_a": torch.distributions.Normal(0.0, 1.0e-14),
+#     "epsilon_z": torch.distributions.Normal(0.0, 1.0),
+#     "epsilon_mu": torch.distributions.Normal(0.0, 1.0),
+#     "tau": torch.distributions.Uniform(0.0, 1.0),
+# }
+# distr_A = {
+#     "epsilon_a": torch.distributions.Normal(0.0, 1.0),
+#     "epsilon_z": torch.distributions.Normal(0.0, 1.0e-14),
+#     "epsilon_mu": torch.distributions.Normal(0.0, 1.0e-14),
+#     "tau": torch.distributions.Uniform(0.0, 1.0),
+# }
+# distr_B = {
+#     "epsilon_a": torch.distributions.Normal(0.0, 1.0e-14),
+#     "epsilon_z": torch.distributions.Normal(0.0, 1.0),
+#     "epsilon_mu": torch.distributions.Normal(0.0, 1.0e-14),
+#     "tau": torch.distributions.Uniform(0.0, 1.0),
+# }
+# distr_C = {
+#     "epsilon_a": torch.distributions.Normal(0.0, 1.0e-14),
+#     "epsilon_z": torch.distributions.Normal(0.0, 1.0e-14),
+#     "epsilon_mu": torch.distributions.Normal(0.0, 1.0),
+#     "tau": torch.distributions.Uniform(0.0, 1.0),
+# }
+#
+# distr_ranges = [distr_F, distr_AB, distr_AC, distr_BC, distr_A, distr_B, distr_C]
 
-distr_ranges = [distr_F, distr_AB, distr_AC, distr_BC, distr_A, distr_B, distr_C]
-
-# %% [markdown]
-"""## Data generation (simulate or load cached pickles)"""
-
+# """## Data generation (simulate or load cached pickles)"""
+#
 # simulate the models
-if rerun:
-    simulate_and_save(
-        par,
-        {},
-        distr_ranges,
-        experiment_settings["model_save_path"],
-        ["F", "AB", "AC", "BC", "A", "B", "C"],
-        draws=experiment_settings["draws"],
-        steps=experiment_settings["steps"],
-        burn=experiment_settings["burn"],
-        labnorm=experiment_settings["labnorm"],
-    )
-
+# if rerun:
+#     simulate_and_save(
+#         par,
+#         {},
+#         distr_ranges,
+#         experiment_settings["model_save_path"],
+#         ["F", "AB", "AC", "BC", "A", "B", "C"],
+#         draws=experiment_settings["draws"],
+#         steps=experiment_settings["steps"],
+#         burn=experiment_settings["burn"],
+#         labnorm=experiment_settings["labnorm"],
+#     )
+#
 # load the data into a tensor
-data_all = load_dataset(experiment_settings["model_save_path"] + "F.pkl")
-data_AB = load_dataset(experiment_settings["model_save_path"] + "AB.pkl")
-data_AC = load_dataset(experiment_settings["model_save_path"] + "AC.pkl")
-data_BC = load_dataset(experiment_settings["model_save_path"] + "BC.pkl")
-data_A = load_dataset(experiment_settings["model_save_path"] + "A.pkl")
-data_B = load_dataset(experiment_settings["model_save_path"] + "B.pkl")
-data_C = load_dataset(experiment_settings["model_save_path"] + "C.pkl")
+# data_all = load_dataset(experiment_settings["model_save_path"] + "F.pkl")
+# data_AB = load_dataset(experiment_settings["model_save_path"] + "AB.pkl")
+# data_AC = load_dataset(experiment_settings["model_save_path"] + "AC.pkl")
+# data_BC = load_dataset(experiment_settings["model_save_path"] + "BC.pkl")
+# data_A = load_dataset(experiment_settings["model_save_path"] + "A.pkl")
+# data_B = load_dataset(experiment_settings["model_save_path"] + "B.pkl")
+# data_C = load_dataset(experiment_settings["model_save_path"] + "C.pkl")
 
 
-# %% [markdown]
-"""## Preprocess datasets (reshape and merge)"""
+# ## Preprocess datasets (reshape and merge)
 
-#  %% Join the first and second dimension for "x" and "y" in each dataset
+# + Join the first and second dimension for "x" and "y" in each dataset
 for data in [data_all, data_AB, data_AC, data_BC, data_A, data_B, data_C]:
     for key in ["x", "y"]:
         if key in data and data[key] is not None and data[key].ndim >= 2:
@@ -263,7 +263,7 @@ data_C_df = pd.concat(
 ).iloc[:-1]
 
 
-# %% Construct datasets for all models
+# + Construct datasets for all models
 partial_datasets = {}
 print("Constructind dataset from all data")
 partial_datasets["all"] = construct_single_xy(
@@ -291,14 +291,14 @@ partial_datasets["C"] = construct_single_xy(
 )
 
 
-# %% Combine the datasets
+# + Combine the datasets
 combinations = {
     "F": ["all"],
     "ABC": ["AB", "AC", "BC"],
     "C": ["C"],
 }
 
-# %% Combine, shuffle, and truncate the datasets
+# + Combine, shuffle, and truncate the datasets
 datasets = {}
 for key, combination in combinations.items():
     temp_x_list = []
@@ -330,7 +330,7 @@ for key, combination in combinations.items():
 
     datasets[key] = {"x": temp_x, "y": temp_y}
 
-# %% Specify the neural network settings
+# + Specify the neural network settings
 
 # Settings for the neural network
 nn_settings = {
@@ -366,12 +366,12 @@ training_settings = {
         "print_after": 100,
     },
 }
+# -
 
 
-# %% [markdown]
-"""## Train or load surrogates"""
+# ## Train or load surrogates
 
-# %% Training or loading the surrogate models
+# + Training or loading the surrogate models
 models_path = str(NN_DIR) + "/"
 Path(models_path).mkdir(parents=True, exist_ok=True)
 surrogates = {}
@@ -393,24 +393,24 @@ else:
         surrogates[key] = surrogate
 
 
-# %% Move the surrogate models to CPU for plotting
+# + Move the surrogate models to CPU for plotting
 for key, surrogate in surrogates.items():
     surrogate.network.to("cpu")
     surrogate.data_validation["x"] = surrogate.data_validation["x"].to("cpu")
     surrogate.data_validation["y"] = surrogate.data_validation["y"].to("cpu")
     surrogate.data_train["x"] = surrogate.data_train["x"].to("cpu")
     surrogate.data_train["y"] = surrogate.data_train["y"].to("cpu")
+# -
 
-# %% [markdown]
-"""## Evaluation & plots"""
+# ## Evaluation & plots
 
-# %% Figures
+# + Figures
 figures_path = str(FIG_DIR) + "/"
 figure_suffix = ""
 Path(figures_path).mkdir(parents=True, exist_ok=True)
 
 
-# %%
+# +
 surrogate_labels = {
     "F": "Full",
     "ABC": "Glued",
@@ -436,9 +436,9 @@ for key, surrogate in [(k, v) for k, v in surrogates.items() if k != "True"]:
         locators=False,
     )
     plt.show()
+# -
 
 
-# %%
 # Example with three surrogates
 plots.plot_error_histogram_three(
     surrogate1=surrogates["C"],
@@ -460,7 +460,7 @@ plots.plot_error_histogram_three(
     ],
 )
 
-# %% example with the other two variables
+# + example with the other two variables
 plots.plot_error_histogram_three(
     surrogate1=surrogates["C"],
     surrogate2=surrogates["F"],
@@ -556,7 +556,7 @@ for name in ["F", "ABC"]:
     print(f"Analytical EEE of {name} at mean state: {EEE_analytical[name]:.5f}")
 
 
-# %% simulate the economy forward for N_sim periods and calculate the EEE for each period
+# + simulate the economy forward for N_sim periods and calculate the EEE for each period
 N_sim = 1000  # lower number than in the paper, but for faster runtime
 
 # simulating forward
@@ -609,7 +609,7 @@ for name in ["F", "ABC"]:
     print(f"Average BM EEE of {name} over {N_sim} periods: {np.mean(EEE[name]):.5f}%")
 
 
-# %% plot the EEE over time
+# + plot the EEE over time
 importlib.reload(plots)
 plots.plot_euler_error_histogram(
     EEE["F"],
@@ -622,7 +622,7 @@ plots.plot_euler_error_histogram(
 )
 
 
-# %% simulate the model forward using the exogenous processes of the simulations
+# + simulate the model forward using the exogenous processes of the simulations
 Capital = {}
 # simulate the economy forward
 for name, data in [
@@ -662,5 +662,6 @@ for name in ["F", "ABC", "C"]:
 
 df_moments = pd.DataFrame(results, columns=["Model"] + moment_names)
 print(df_moments.to_string(index=False))
+# -
 
-# %%
+

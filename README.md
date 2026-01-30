@@ -47,6 +47,8 @@ To use the code open a shell and execute the following commands.
 - Notebook version:  
   - Generate once via Jupytext: `jupytext --to ipynb examples/analysis_BM.py`  
   - Then open/run `examples/analysis_BM.ipynb` in Jupyter/Lab.
+- Colab version:  
+  Open `examples/analysis_BM_colab.ipynb` (includes an install cell).
 - Docs site:  
   ```bash
   # generate API pages via quartodoc then render site
