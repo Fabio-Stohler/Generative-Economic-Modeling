@@ -5,6 +5,9 @@ project:
     - reference
     - objects.json
 
+execute:
+  enabled: false
+
 website:
   title: "Generative Economic Modeling"
   page-navigation: true
