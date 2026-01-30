@@ -2,11 +2,13 @@
 """
 # Brock–Mirman Surrogate Analysis
 
-Step-by-step script to generate datasets, train/load surrogates, and produce figures.
+This script walks through:
 
-- Runs as a plain Python script.
-- Converts cleanly to a notebook via `jupytext --to ipynb examples/analysis_BM.py`.
-- Paths are relative to the repo root so it works from VS Code, CLI, or Quarto.
+1. **Imports & config** – bring in the GEM package and set paths.
+2. **Data generation/loading** – simulate BM datasets or load cached pickles.
+3. **Preprocessing** – build shuffled/combined training sets.
+4. **Surrogate fitting** – train or load neural surrogates for policy functions.
+5. **Evaluation & plots** – loss curves, error histograms, Euler errors, moments.
 """
 
 # %%
@@ -62,6 +64,15 @@ if Force_CPU:
     device = "cpu"
     print("Forcing CPU usage.")
 
+# %% [markdown]
+"""
+## Run-time switches
+
+- `retrain`: train surrogates (True) or load cached ones (False).
+- `rerun`: regenerate simulation datasets (True) or load cached pickles (False).
+- `truncate_length`: cap dataset length for faster experiments.
+"""
+
 # %% Constants and lists
 # retrain the full surrogate model
 retrain = True
@@ -72,6 +83,9 @@ rerun = True
 # Truncation length for dataset
 truncate_length = 10000  # Set to None to use the full dataset
 
+# %% [markdown]
+"""## Reproducibility and plotting defaults"""
+
 # %%
 # Fix seed for torch and numpy
 torch.manual_seed(42)
@@ -81,6 +95,9 @@ np.random.seed(42)
 # Increase the font size
 plt.rcParams.update({"font.size": 13})
 
+
+# %% [markdown]
+"""## Data generation settings"""
 
 # simulate data
 # Settings for the experiment in general
@@ -166,6 +183,9 @@ distr_C = {
 
 distr_ranges = [distr_F, distr_AB, distr_AC, distr_BC, distr_A, distr_B, distr_C]
 
+# %% [markdown]
+"""## Data generation (simulate or load cached pickles)"""
+
 # simulate the models
 if rerun:
     simulate_and_save(
@@ -189,6 +209,9 @@ data_A = load_dataset(experiment_settings["model_save_path"] + "A.pkl")
 data_B = load_dataset(experiment_settings["model_save_path"] + "B.pkl")
 data_C = load_dataset(experiment_settings["model_save_path"] + "C.pkl")
 
+
+# %% [markdown]
+"""## Preprocess datasets (reshape and merge)"""
 
 #  %% Join the first and second dimension for "x" and "y" in each dataset
 for data in [data_all, data_AB, data_AC, data_BC, data_A, data_B, data_C]:
@@ -345,6 +368,9 @@ training_settings = {
 }
 
 
+# %% [markdown]
+"""## Train or load surrogates"""
+
 # %% Training or loading the surrogate models
 models_path = str(NN_DIR) + "/"
 Path(models_path).mkdir(parents=True, exist_ok=True)
@@ -374,6 +400,9 @@ for key, surrogate in surrogates.items():
     surrogate.data_validation["y"] = surrogate.data_validation["y"].to("cpu")
     surrogate.data_train["x"] = surrogate.data_train["x"].to("cpu")
     surrogate.data_train["y"] = surrogate.data_train["y"].to("cpu")
+
+# %% [markdown]
+"""## Evaluation & plots"""
 
 # %% Figures
 figures_path = str(FIG_DIR) + "/"
