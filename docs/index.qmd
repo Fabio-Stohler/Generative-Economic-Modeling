@@ -35,7 +35,3 @@ This site documents the Brock–Mirman surrogate example from the paper “Gener
 - `examples/analysis_BM_colab.ipynb` — Colab-ready notebook with setup cell.
 - `bld/` — generated data/models/figures (ignored in git).
 - `docs/` — Quarto sources (this site).
-
-## Support
-
-Issues or suggestions? Open a ticket in the repository and mention which page/example needs attention.
