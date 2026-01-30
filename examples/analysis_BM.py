@@ -12,6 +12,7 @@ Step-by-step script to generate datasets, train/load surrogates, and produce fig
 # %%
 # Standard library
 from pathlib import Path
+import sys
 import importlib
 
 # Third-party dependencies
@@ -20,6 +21,12 @@ import pandas as pd
 import torch
 from matplotlib import pyplot as plt
 from tqdm import trange
+
+# Make repo src importable when running the example directly
+BASE_DIR = Path(__file__).resolve().parent.parent
+SRC_DIR = BASE_DIR / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
 
 # Local imports
 from gem import plots
