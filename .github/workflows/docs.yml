@@ -31,19 +31,10 @@ jobs:
         with:
           version: "1.4.556"
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install dependencies
+      - name: Install docs deps only
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -e .
+          pip install "quartodoc==0.11.1"
 
       - name: Sync examples into docs
         run: |
@@ -52,6 +43,8 @@ jobs:
           cp examples/analysis_BM.ipynb docs/examples/
 
       - name: Build API docs (quartodoc)
+        env:
+          PYTHONPATH: src
         run: quartodoc build --config docs/_quarto.yml
 
       - name: Render site (Quarto)
