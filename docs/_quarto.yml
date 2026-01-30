@@ -16,8 +16,14 @@ website:
         text: BM Example
       - href: examples/analysis_BM.ipynb
         text: Brock–Mirman Notebook
+      - href: examples/analysis_BM_colab.ipynb
+        text: Colab Notebook
       - href: reference/index.qmd
         text: Reference
+    right:
+      - icon: github
+        href: https://github.com/Fabio-Stohler/Generative-Economic-Modeling
+        aria-label: "GitHub repository"
 
 format:
   html:
