@@ -14,7 +14,7 @@ from .data import (
     load_pickle,
     save_pickle,
 )
-from .core import Parameters, Ranges, State, Shocks
+from .structures import Parameters, Ranges, State, Shocks
 from .plotting import plots
 from .data import helpers, io_utils
 from .plotting import (

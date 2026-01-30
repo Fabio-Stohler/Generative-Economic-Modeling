@@ -40,10 +40,10 @@ quartodoc:
         - model.bm.BMModel
     - title: Data structures
       contents:
-        - core.structures.Parameters
-        - core.structures.Ranges
-        - core.structures.State
-        - core.structures.Shocks
+        - structures.Parameters
+        - structures.Ranges
+        - structures.State
+        - structures.Shocks
     - title: Plots
       contents:
         - plotting.plots
