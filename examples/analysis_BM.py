@@ -9,7 +9,6 @@
 from pathlib import Path
 import sys
 import os
-import subprocess
 
 COLAB_SETUP = False  # set True in Colab to clone & install this repo
 if COLAB_SETUP:
@@ -17,17 +16,11 @@ if COLAB_SETUP:
     BRANCH = "main"
     CLONE_DIR = Path("/content/generative-economic-modeling")
 
-    if CLONE_DIR.exists():
-        os.chdir(CLONE_DIR)
-        subprocess.run(["git", "pull"], check=True)
-    else:
-        subprocess.run(
-            ["git", "clone", "--depth", "1", "--branch", BRANCH, REPO_URL, str(CLONE_DIR)],
-            check=True,
-        )
-        os.chdir(CLONE_DIR)
-
-    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-e", "."], check=True)
+    if not CLONE_DIR.exists():
+        !git clone --depth 1 --branch $BRANCH $REPO_URL $CLONE_DIR
+    %cd $CLONE_DIR
+    %pip install -q numpy pandas scipy torch matplotlib tqdm
+    %pip install -q -e . --no-deps
     BASE_DIR = CLONE_DIR
 else:
     try:
