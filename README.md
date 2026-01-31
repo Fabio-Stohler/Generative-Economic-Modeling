@@ -1,6 +1,6 @@
 # Generative-Economic-Modeling-Code
 
-Example code for the analytical real-business-cycle model from *"Generative Economic Modeling"* by H. Kase, M. Rottner, and F. Stohler.
+Example code for the analytical real-business-cycle model from *"Generative Economic Modeling"* by [Hanno Kase](https://www.hannokase.com/), [Matthias Rottner](https://sites.google.com/view/matthias-rottner), and [Fabio Stohler](https://fabio-stohler.github.io/).
 
 - Docs site: https://fabio-stohler.github.io/Generative-Economic-Modeling/
 - Colab notebook: https://colab.research.google.com/github/Fabio-Stohler/Generative-Economic-Modeling/blob/main/examples/analysis_BM_colab.ipynb

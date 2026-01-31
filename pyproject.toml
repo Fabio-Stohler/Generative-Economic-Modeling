@@ -6,7 +6,11 @@ build-backend = "setuptools.build_meta"
 name = "gem"
 version = "0.1.0"
 description = "Generative Economic Modeling utilities (Brock–Mirman surrogates)"
-authors = [{ name = "H. Kase et al." }]
+authors = [
+  { name = "Hanno Kase" },
+  { name = "Matthias Rottner" },
+  { name = "Fabio Stohler" }
+]
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

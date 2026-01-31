@@ -11,6 +11,12 @@ execute:
 website:
   title: "Generative Economic Modeling"
   page-navigation: true
+  page-footer:
+    center: |
+      © 2026 Developed by
+      [Hanno Kase](https://www.hannokase.com/),
+      [Matthias Rottner](https://sites.google.com/view/matthias-rottner),
+      [Fabio Stohler](https://fabio-stohler.github.io/).
   navbar:
     left:
       - href: index.qmd

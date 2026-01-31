@@ -5,14 +5,13 @@ page-layout: article
 
 # Welcome
 
-Documentation for the `gem` package, a small toolkit for training neural surrogates, and evaluating their accuracy. The Brock–Mirman notebook below walks through the full pipeline (data generation, surrogate fitting, diagnostics), while the paper provides the broader methodology and results.
+Documentation for the `gem` package, a small toolkit for training neural surrogates and evaluating their accuracy. The Brock–Mirman notebook below walks through the full pipeline (data generation, surrogate fitting, diagnostics), while the paper provides the broader methodology and results.
 
-<a href="https://colab.research.google.com/github/Fabio-Stohler/Generative-Economic-Modeling/blob/main/examples/analysis_BM_colab.ipynb" target="_blank" rel="noopener">
-  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab" style="vertical-align: middle;"/> Run the notebook in Colab
+<a class="btn btn-warning btn-sm" href="https://colab.research.google.com/github/Fabio-Stohler/Generative-Economic-Modeling/blob/main/examples/analysis_BM_colab.ipynb">
+  <i class="bi bi-box-arrow-up-right"></i> Open in Colab
 </a>
-<br>
-<a href="https://www.bis.org/publ/work1312.htm" target="_blank" rel="noopener" style="display:inline-block; margin-top:0.35rem;">
-  📄 “Generative Economic Modeling” (BIS Working Paper 1312)
+<a class="btn btn-outline-secondary btn-sm" href="https://www.bis.org/publ/work1312.htm">
+  <i class="bi bi-journal-text"></i> Read the paper
 </a>
 
 ## Quick start
