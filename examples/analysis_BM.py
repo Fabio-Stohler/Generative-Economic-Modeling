@@ -2,8 +2,9 @@
 # # Brock–Mirman Surrogate Analysis
 #
 # End-to-end walkthrough of the Brock–Mirman surrogate pipeline.
-# - Colab: set `COLAB_SETUP = True` in the next cell (or open via the Colab link in the README) to auto-clone and install the repo in your session.
+# - Colab: set `COLAB_SETUP = TRUE` in the next cell (or open via the Colab link in the README) to auto-clone and install the repo in your session.
 # - Steps covered: imports & config, data generation/loading, preprocessing, surrogate fitting, evaluation & plots.
+# - For more details about the model and the algorithm, see the paper: ["Generative Economic Modeling" (BIS Working Paper 1312)](https://www.bis.org/publ/work1312.htm)
 
 # %% Optional: Colab setup (run first in Colab)
 from pathlib import Path
