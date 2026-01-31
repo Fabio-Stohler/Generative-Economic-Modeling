@@ -2,6 +2,7 @@
 
 Example code for the analytical real-business-cycle model from *"Generative Economic Modeling"* by [Hanno Kase](https://www.hannokase.com/), [Matthias Rottner](https://sites.google.com/view/matthias-rottner), and [Fabio Stohler](https://fabio-stohler.github.io/).
 
+- Paper: https://www.bis.org/publ/work1312.htm
 - Docs site: https://fabio-stohler.github.io/Generative-Economic-Modeling/
 - Colab notebook: https://colab.research.google.com/github/Fabio-Stohler/Generative-Economic-Modeling/blob/main/examples/analysis_BM_colab.ipynb
 
@@ -56,6 +57,7 @@ To use the code open a shell and execute the following commands.
 
 ## Tested environments
 - Windows 11 Pro (Dell Latitude 5330, Intel i5-1235U)
+- macOS 26 (Apple Silicon MacBook Pro, M1 Pro)
 
 ## References
 
