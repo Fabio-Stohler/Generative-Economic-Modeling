@@ -90,6 +90,7 @@ class Shocks(Element):
 
     def sample(self, shape, antithetic=False, device="cpu"):
         if antithetic:
+            # Use antithetic pairs to reduce Monte Carlo variance.
             shape_antithetic = (shape[0] // 2, *shape[1:])
             shock_draw = {}
             for key, value in self.__dict__.items():

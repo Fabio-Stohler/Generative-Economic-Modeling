@@ -231,6 +231,7 @@ class BMModel(object):
         return self.shock.sample(shape, antithetic, device=device)
 
     def policy(self, state=None, par=None):
+        """Return policy functions (labor, consumption, next-period capital)."""
         if state is None:
             state = self.state
         if par is None:
@@ -252,9 +253,11 @@ class BMModel(object):
 
     @torch.no_grad()
     def step(self, e):
+        """Advance the state one period given a shock draw."""
         par = self.par_draw
         state = self.state
 
+        # Log-AR(1) processes for technology and preference shocks.
         A_next = (
             (1 - par.rho_a) * (torch.log(par.Abar) - par.sigma_a**2 / 2)
             + par.rho_a * state.A
@@ -282,12 +285,14 @@ class BMModel(object):
         )
 
     def steps(self, device, steps):
+        """Iterate the model forward for a number of steps (used for burn-in)."""
         for _ in range(steps):
             e = self.draw_shocks((1,), device=device)
             self.state = self.step(e)
 
     @torch.no_grad()
     def sim_step(self, par=None):
+        """Return the simulated observable variables for the current state."""
         if par is None:
             par = self.par_draw
         A = torch.exp(self.state.A)
@@ -310,6 +315,7 @@ class BMModel(object):
     def simulate(
         self, par=None, burn=0, steps=120, device="cpu", seed=None, labnorm=True
     ):
+        """Simulate a single trajectory of length `steps` and return states/controls/shocks."""
         # Manual seed
         if seed is not None:
             torch.manual_seed(seed)
@@ -414,7 +420,8 @@ class BMModel(object):
             v_controls = torch.stack([value for value in controls.values()], dim=-1)
             v_shocks = torch.stack([value for value in shocks.values()], dim=-1)
 
-            # Stack results
+            # Stack results: x uses states/parameters at t, y uses controls at t.
+            # Drop the last state so x and y align.
             temp_x = torch.cat([v_states, v_par], dim=-1)[:-1, :]
             temp_y = torch.cat([v_controls], dim=-1)
 

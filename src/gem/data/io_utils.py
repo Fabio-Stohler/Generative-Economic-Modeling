@@ -20,6 +20,7 @@ def load_pickle(path):
 
 def load_dataset(path):
     """Load a dataset saved either as a dict with keys like 'x'/'y' or a BMModel with .dataset."""
+    # This helper keeps backward compatibility with older pickles that store a BMModel.
     obj = load_pickle(path)
     if isinstance(obj, dict) and "x" in obj:
         return obj
