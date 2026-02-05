@@ -84,6 +84,7 @@ def plot_naive_comparison(
     suptitle=None,
     ncol=3,
 ):
+    """Compare surrogate predictions to a naive baseline and plot MSE bars."""
     # Determine which data to use for evaluation.
     if x_validation is None:
         x = surrogate.data_validation["x"]
@@ -143,6 +144,7 @@ def plot_surrogate_validation(
     suptitle=None,
     ncol=3,
 ):
+    """Scatter-plot predicted vs. actual values for validation data."""
     # Determine which data to use for evaluation.
     if x_validation is None:
         x = surrogate_LKC.data_validation["x"]
@@ -199,6 +201,7 @@ def plot_error_histogram(
     x_range=[-0.025, 0.025],
     ncol=3,
 ):
+    """Plot relative error histograms for two surrogates on the same axes."""
     if x_validation is None:
         x = surrogate1.data_validation["x"]
     else:
@@ -242,6 +245,7 @@ def plot_error_histogram(
 
 # %% plotting the training loss
 def plot_training_validation_loss(loss_dict, label, smoothing_window=100, ylim=None, selected_keys=None, save_path=None, save_name=None, suffix="", locators=True):
+    """Plot smoothed training and validation losses over epochs."""
     iterations = loss_dict["iteration"]
 
     if selected_keys is None:
@@ -304,6 +308,7 @@ def plot_error_histogram_three(
     ncol=3,
     **kwargs,
 ):
+    """Plot relative error histograms for three surrogates."""
     if x_validation is None:
         x = surrogate1.data_validation["x"]
     else:
@@ -372,6 +377,7 @@ def plot_euler_error_histogram(
     num_locators_x=10,
     num_locators_y=10,
 ):
+    """Plot histogram of Euler equation errors for two models (log scale)."""
     # colors to use for plotting
     colors = ["#D95319", "#0072BD"]
 

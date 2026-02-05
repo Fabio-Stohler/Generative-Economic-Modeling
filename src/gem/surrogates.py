@@ -52,6 +52,7 @@ class Surrogate:
     def __init__(self, data=None):
         # Convert dataset to torch tensors if provided.
         if data is not None:
+            # Flatten time/batch dimensions so each row is one training sample.
             self.data = self.flatten(copy.deepcopy(data))
             self.N_x = self.data["x"].shape[-1]
             self.N_y = self.data["y"].shape[-1]
@@ -225,7 +226,7 @@ class Surrogate:
         else:
             loss_function = loss_fun
 
-        # Split dataset into training and validation samples and create dataloaders
+        # Split dataset into training and validation samples and create dataloaders.
         self.data_train, self.data_validation = self.split_data(self.data, validation_share, shuffle=shuffle_data)
         dataset_train = torch.utils.data.TensorDataset(self.data_train["x"], self.data_train["y"])
         dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch, shuffle=True)
@@ -234,7 +235,7 @@ class Surrogate:
             dataset_validation = torch.utils.data.TensorDataset(self.data_validation["x"], self.data_validation["y"])
             dataloader_validation = torch.utils.data.DataLoader(dataset_validation, batch_size=batch, shuffle=True)
 
-        # Print some statistics and moments about the training and validation data
+        # Print some statistics about the training and validation data.
         print("Training data:")
         print(f"  - Number of samples: {self.data_train['x'].shape[0]}")
         print(f"  - Number of features: {self.data_train['x'].shape[1]}")

@@ -46,6 +46,7 @@ def simulate_and_save(
     for i, distr_range in enumerate(distr_ranges):
         model = BMModel(par, pars, distr_range)
 
+        # Retry simulation if NaNs appear (numerical issues can arise for some draws).
         K = 25
         dataset = None
         for j in range(K):
@@ -113,7 +114,7 @@ def construct_single_xy(
     if active_eps is None:
         active_eps = ["ϵ_a", "ϵ_z", "ϵ_mu"]
 
-    # Back out eps from the exogenous states when requested.
+    # Back out shocks from exogenous states when requested.
     if extract_eps:
         # Drop the eps columns if they exist
         for ep in eps:
@@ -134,7 +135,7 @@ def construct_single_xy(
         # Append it to the data
         data = pd.concat([data, data_eps], axis=1)
 
-    # If eps is not in the active_eps, multiply it by zero
+    # Zero out inactive shock innovations so partial datasets match the intended model.
     # NOTE: The data currently has eps with mean and std different form zero even for the partial datasets
     for ep in eps:
         if ep not in active_eps:
@@ -181,6 +182,7 @@ def construct_single_xy(
 
 def ar1_lognormal_draws(states, rhos, stds, shocks, log_means):
     """Draw lognormal AR(1) samples given current states and shocks."""
+    # Uses a log-AR(1) transition with a mean correction so E[exp(log s)] matches exp(log_mean).
     # states, rhos, stds, log_means are length-3 tensors on the same device
     # shocks is (N,3)
     # log s_{t+1} = (1−rho) log_mean + rho log s_t + σ ε

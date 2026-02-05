@@ -33,6 +33,7 @@ else:
 # Ensure source is importable without installing the package
 sys.path.insert(0, str(BASE_DIR / "src"))
 
+# Project output folders (created as needed below).
 DATA_DIR = BASE_DIR / "bld" / "data" / "BM"
 FIG_DIR = BASE_DIR / "bld" / "figures" / "BM"
 NN_DIR = BASE_DIR / "bld" / "models" / "BM"
@@ -66,6 +67,7 @@ Force_CPU = True
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 if Force_CPU:
+    # Force CPU for deterministic behavior and to avoid GPU availability issues.
     device = "cpu"
     print("Forcing CPU usage.")
 
@@ -200,6 +202,7 @@ if rerun:
         labnorm=experiment_settings["labnorm"],
     )
 
+# Load cached datasets (each dataset contains x/y tensors).
 # load the data into a tensor
 data_all = load_dataset(experiment_settings["model_save_path"] + "F.pkl")
 data_AB = load_dataset(experiment_settings["model_save_path"] + "AB.pkl")
@@ -214,6 +217,7 @@ data_C = load_dataset(experiment_settings["model_save_path"] + "C.pkl")
 # ## Preprocess datasets (reshape and merge)
 
 #  %% Join the first and second dimension for "x" and "y" in each dataset
+# We flatten (draws, time, features) -> (draws * time, features) so each row is one sample.
 for data in [data_all, data_AB, data_AC, data_BC, data_A, data_B, data_C]:
     for key in ["x", "y"]:
         if key in data and data[key] is not None and data[key].ndim >= 2:
@@ -222,6 +226,7 @@ for data in [data_all, data_AB, data_AC, data_BC, data_A, data_B, data_C]:
 
 
 # extract the first four variables of x, and the last two variables of y, and drop the last row
+# We drop the last row to align t and t+1 construction later on.
 data_all_df = pd.concat(
     [
         tensor_to_dataframe(data_all["x"][:, :4], ["K", "A", "Z", "mu"]),
@@ -262,22 +267,28 @@ data_C_df = pd.concat(
 # %% Construct datasets for all models
 partial_datasets = {}
 print("Constructind dataset from all data")
+# Full model: all shocks active.
 partial_datasets["all"] = construct_single_xy(data_all_df, active_eps=["ϵ_a", "ϵ_z", "ϵ_mu"], extract_eps=True)
 
 print("Constructing dataset from tfp_zeta data")
+# Two-shock model (A and Z shocks only).
 partial_datasets["AB"] = construct_single_xy(data_AB_df, active_eps=["ϵ_a", "ϵ_z"], extract_eps=True)
 
 print("Constructing dataset from tfp_delta data")
+# Two-shock model (A and mu shocks only).
 partial_datasets["AC"] = construct_single_xy(data_AC_df, active_eps=["ϵ_a", "ϵ_mu"], extract_eps=True)
 
 print("Constructing dataset from zeta_delta data")
+# Two-shock model (Z and mu shocks only).
 partial_datasets["BC"] = construct_single_xy(data_BC_df, active_eps=["ϵ_z", "ϵ_mu"], extract_eps=True)
 
 print("Constructing dataset from delta data")
+# One-shock model (mu only).
 partial_datasets["C"] = construct_single_xy(data_C_df, active_eps=["ϵ_mu"], extract_eps=True)
 
 
 # %% Combine the datasets
+# Map surrogate labels to the partial datasets used for training.
 combinations = {
     "F": ["all"],
     "ABC": ["AB", "AC", "BC"],
@@ -296,7 +307,8 @@ for key, combination in combinations.items():
         shuffled_x = partial_datasets[name]["x"][indices]
         shuffled_y = partial_datasets[name]["y"][indices]
 
-        # Truncate each dataset proportionally if truncation is enabled
+        # Truncate each dataset proportionally if truncation is enabled.
+        # This keeps the mixtures balanced across the component datasets.
         if truncate_length is not None:
             proportion = truncate_length // len(combination)
             shuffled_x = shuffled_x[:proportion]
@@ -381,6 +393,7 @@ else:
 
 # %% Move the surrogate models to CPU for plotting
 for key, surrogate in surrogates.items():
+    # Ensure tensors live on CPU so plotting doesn't depend on CUDA availability.
     surrogate.network.to("cpu")
     surrogate.data_validation["x"] = surrogate.data_validation["x"].to("cpu")
     surrogate.data_validation["y"] = surrogate.data_validation["y"].to("cpu")
@@ -426,6 +439,7 @@ for key, surrogate in [(k, v) for k, v in surrogates.items() if k != "True"]:
 
 # %%
 # Example with three surrogates
+# Compare error distributions across three surrogate types.
 plots.plot_error_histogram_three(
     surrogate1=surrogates["C"],
     surrogate2=surrogates["F"],
