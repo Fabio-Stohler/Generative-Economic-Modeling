@@ -58,17 +58,7 @@ class BMModel(object):
             par = self.par_draw
 
         # Return labor
-        return (
-            par.mubar
-            * (1 - state.tau_L)
-            * (1 - par.alpha)
-            / (
-                torch.exp(state.mu)
-                * par.omega
-                * (1 + par.tau_C)
-                * (par.mubar - (1 - par.tau_K) * par.alpha * par.beta)
-            )
-        ) ** (1 / (1 + par.gamma))
+        return (par.mubar * (1 - state.tau_L) * (1 - par.alpha) / (torch.exp(state.mu) * par.omega * (1 + par.tau_C) * (par.mubar - (1 - par.tau_K) * par.alpha * par.beta))) ** (1 / (1 + par.gamma))
 
     def output(self, state, par=None):
         """
@@ -79,11 +69,7 @@ class BMModel(object):
             par = self.par_draw
 
         # Return output
-        return (
-            torch.exp(state.A)
-            * state.capital**par.alpha
-            * (torch.exp(state.Z) * self.labor(state, par)) ** (1 - par.alpha)
-        )
+        return torch.exp(state.A) * state.capital**par.alpha * (torch.exp(state.Z) * self.labor(state, par)) ** (1 - par.alpha)
 
     def consumption(self, state, par=None):
         """
@@ -124,23 +110,12 @@ class BMModel(object):
         # We use the mean of tau_L to calculate the SS value of omega
         if labnorm:
             L = 1
-            omega = (
-                (1 - par.alpha)
-                * (1 - self.shock["tau"].mean)
-                / L ** (1 + par.gamma)
-                / (1 + par.tau_C)
-                / (par.mubar - par.alpha * par.beta * (1 - par.tau_K))
-            )
+            omega = (1 - par.alpha) * (1 - self.shock["tau"].mean) / L ** (1 + par.gamma) / (1 + par.tau_C) / (par.mubar - par.alpha * par.beta * (1 - par.tau_K))
         else:
             omega = par.omega
 
         # solving for the steady state value of capital
-        kss = (
-            (par.alpha * par.beta / par.mubar * (1 - par.tau_K) * par.Abar)
-            ** (1 / (1 - par.alpha))
-            * self.labor(self.state, par)
-            * par.Zbar
-        )
+        kss = (par.alpha * par.beta / par.mubar * (1 - par.tau_K) * par.Abar) ** (1 / (1 - par.alpha)) * self.labor(self.state, par) * par.Zbar
 
         # setting the calibrated value of omega and the capital in ss
         self.par.omega = omega
@@ -180,9 +155,7 @@ class BMModel(object):
 
         return State({"A": A, "Z": Z, "mu": mu, "capital": ss.kss, "tau_L": tau})
 
-    def initialize_state_stochastic(
-        self, par=None, multiplier=1.0, device="cpu", labnorm=True
-    ):
+    def initialize_state_stochastic(self, par=None, multiplier=1.0, device="cpu", labnorm=True):
         """
         Prepare the initial state of the model, with a random realization of epsilon and the captial stock.
         """
@@ -204,15 +177,9 @@ class BMModel(object):
         ergodic_mu = ergodic_sigma(rho_mu, sigma_mu)
 
         # Draw initial value for log A from ergodic distribution
-        A = torch.randn((1,), device=device) * ergodic_a * multiplier + torch.log(
-            par.Abar
-        )
-        Z = torch.randn((1,), device=device) * ergodic_z * multiplier + torch.log(
-            par.Zbar
-        )
-        mu = torch.randn((1,), device=device) * ergodic_mu * multiplier + torch.log(
-            par.mubar
-        )
+        A = torch.randn((1,), device=device) * ergodic_a * multiplier + torch.log(par.Abar)
+        Z = torch.randn((1,), device=device) * ergodic_z * multiplier + torch.log(par.Zbar)
+        mu = torch.randn((1,), device=device) * ergodic_mu * multiplier + torch.log(par.mubar)
 
         # Draw initial value for tau
         tau = self.shock.sample((1,), device=device)["tau"] * par.tau_switch
@@ -220,9 +187,7 @@ class BMModel(object):
         # Draw multiplier for capital stock
         factor = torch.empty((1,), device=device).uniform_(0.5, 1.5)
 
-        return State(
-            {"A": A, "Z": Z, "mu": mu, "capital": ss.kss * factor, "tau_L": tau}
-        )
+        return State({"A": A, "Z": Z, "mu": mu, "capital": ss.kss * factor, "tau_L": tau})
 
     def draw_parameters(self, shape, device="cpu"):
         return self.range.sample(shape, device=device)
@@ -257,20 +222,10 @@ class BMModel(object):
         par = self.par_draw
         state = self.state
 
-        # Log-AR(1) processes for technology and preference shocks.
-        A_next = (
-            (1 - par.rho_a) * (torch.log(par.Abar) - par.sigma_a**2 / 2)
-            + par.rho_a * state.A
-            + e.epsilon_a * par.sigma_a
-        )
-        Z_next = (
-            (1 - par.rho_z) * (torch.log(par.Zbar) - par.sigma_z**2 / 2)
-            + par.rho_z * state.Z
-            + e.epsilon_z * par.sigma_z
-        )
-        mu_next = (
-            (torch.log(par.mubar)) + 0.5 * par.sigma_mu**2 + e.epsilon_mu * par.sigma_mu
-        )
+        # Log-AR(1) processes for technology and markup shocks.
+        A_next = (1 - par.rho_a) * (torch.log(par.Abar) - par.sigma_a**2 / 2) + par.rho_a * state.A + e.epsilon_a * par.sigma_a
+        Z_next = (1 - par.rho_z) * (torch.log(par.Zbar) - par.sigma_z**2 / 2) + par.rho_z * state.Z + e.epsilon_z * par.sigma_z
+        mu_next = (torch.log(par.mubar)) + 0.5 * par.sigma_mu**2 + e.epsilon_mu * par.sigma_mu
         K_next = self.capital(state, par)
         tau_next = e.tau * par.tau_switch
 
@@ -312,9 +267,7 @@ class BMModel(object):
         }
 
     @torch.no_grad()
-    def simulate(
-        self, par=None, burn=0, steps=120, device="cpu", seed=None, labnorm=True
-    ):
+    def simulate(self, par=None, burn=0, steps=120, device="cpu", seed=None, labnorm=True):
         """Simulate a single trajectory of length `steps` and return states/controls/shocks."""
         # Manual seed
         if seed is not None:
@@ -361,15 +314,9 @@ class BMModel(object):
             # rather than storing the shocks, we store the scaled shocks
             for key, value in e.items():
                 if key == "epsilon_mu":  # very quick fix to avoid scaling the mu shocks
-                    shocks[key].append(
-                        (self.par_draw["sigma" + key[-3:]] * value).squeeze(-1)
-                    )
-                elif (
-                    key != "tau" and key != "mu"
-                ):  # very quick fix to avoid scaling the tau shocks
-                    shocks[key].append(
-                        (self.par_draw["sigma" + key[-2:]] * value).squeeze(-1)
-                    )
+                    shocks[key].append((self.par_draw["sigma" + key[-3:]] * value).squeeze(-1))
+                elif key != "tau" and key != "mu":  # very quick fix to avoid scaling the tau shocks
+                    shocks[key].append((self.par_draw["sigma" + key[-2:]] * value).squeeze(-1))
                 else:
                     shocks[key].append(value.squeeze(-1))
 
@@ -408,14 +355,10 @@ class BMModel(object):
             par = self.draw_parameters(shape=(1,), device=device)
 
             # Simulate
-            states, controls, shocks = self.simulate(
-                par, burn, steps, device, seed, labnorm
-            )
+            states, controls, shocks = self.simulate(par, burn, steps, device, seed, labnorm)
 
             # Convert par, results, shocks to tensors and stack
-            v_par = torch.cat([value.unsqueeze(0) for value in par.values()], dim=-1).expand(
-                steps, -1
-            )
+            v_par = torch.cat([value.unsqueeze(0) for value in par.values()], dim=-1).expand(steps, -1)
             v_states = torch.stack([value for value in states.values()], dim=-1)
             v_controls = torch.stack([value for value in controls.values()], dim=-1)
             v_shocks = torch.stack([value for value in shocks.values()], dim=-1)
